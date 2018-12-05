@@ -92,7 +92,7 @@ class PaymentController extends Controller
                                 )
     {
 	 
-        $this->request         = $request;
+        $this->request         = $request->all();
         $this->response        = $response;
         $this->paymentHelper   = $paymentHelper;
         $this->sessionStorage  = $sessionStorage;
@@ -110,7 +110,7 @@ class PaymentController extends Controller
     
     {
 	    $this->getLogger(__METHOD__)->error('log1', 11);
-        $requestData = $this->request->all();
+        $requestData = $this->request;
         $this->getLogger(__METHOD__)->error('logddd',$requestData);
         $requestData['payment_id'] = (!empty($requestData['payment_id'])) ? $requestData['payment_id'] : $requestData['key'];
         $isPaymentSuccess = isset($requestData['status']) && in_array($requestData['status'], ['90','100']);
@@ -157,7 +157,7 @@ $this->getLogger(__METHOD__)->error('log2', 22);
      */
     public function processPayment()
     {
-        $requestData = $this->request->all();
+        $requestData = $this->request;
         
         if(!empty($requestData['paymentKey']) && in_array($requestData['paymentKey'], ['NOVALNET_CC', 'NOVALNET_SEPA', 'NOVALNET_INVOICE']) && (!empty($requestData['nn_pan_hash']) || !empty($requestData['nn_sepa_hash']) || !empty($requestData['nn_invoice_birthday'])))
         $serverRequestData = $this->paymentService->getRequestParameters($this->basketRepository->load(), $requestData['paymentKey']);
@@ -295,7 +295,7 @@ $this->getLogger(__METHOD__)->error('log2', 22);
      */
     public function redirectPayment()
     {
-		$requestData = $this->request->all();
+		$requestData = $this->request;
 		$paymentRequestData = $this->sessionStorage->getPlugin()->getValue('nnPaymentData');
 		$orderNo = $this->sessionStorage->getPlugin()->getValue('nnOrderNo');
 		$paymentRequestData['order_no'] = $orderNo;
