@@ -1,0 +1,75 @@
+<script src="{{ plugin_path('Novalnet') }}/js/sepa.js"></script>
+<form method="post" id="sepa_form" name="sepa_form" action="{{nnPaymentProcessUrl}}">
+<input type="hidden" id="paymentKey" name="paymentKey" value="{{paymentMopKey}}" />
+<input type='hidden' id='nn_sepa_hash' name='nn_sepa_hash'>
+<input type='hidden' id='nn_vendor' value='{{nnSepaHiddenValue["vendor"]}}'>
+<input type='hidden' id='nn_auth_code' value='{{nnSepaHiddenValue["authcode"]}}'>
+<input type='hidden' id='nn_sepa_uniqueid' name='nn_sepa_uniqueid' value='{{nnSepaHiddenValue["sepauniqueid"]}}'>
+<input type='hidden' id='nn_sepa_merchant_valid_message' value='{{nnSepaHiddenValue["sepavendormsg"]}}'>
+<input type='hidden' id='nn_sepa_valid_message' value='{{nnSepaHiddenValue["sepacardmsg"]}}'>
+<input type='hidden' id='nn_sepa_confirm_iban_bic_msg' value='{{nnSepaHiddenValue["sepaacceptmandate"]}}'>
+<input type='hidden' id='nn_sepa_countryerror_msg' value='{{nnSepaHiddenValue["sepacountryerror"]}}'>
+<input type='hidden' id='nn_sepa_valid_dob_msg' value='{{nnSepaHiddenValue["sepadoberror"]}}'>
+<input type='hidden' id='nn_sepa_ibanbic_confirm_id'>
+<input type='hidden' id='sepa_bic_gen'>
+<input type='hidden' id='sepa_iban_gen'>
+	
+	<div class="account_holder-section">
+        <div class="label"><label for="sepa_cardholder">{{trans("Novalnet::PaymentMethod.sepa_account_holder_label")}}</label></div>
+        <div class="content">
+            <input type="text" id="sepa_cardholder" name="sepa_cardholder" onkeypress="return ibanbic_validate(event, 'sepa_cardholder')">
+        </div>
+    </div>
+	<div class="bank_country-section">
+        <div class="label"><label for="sepa_country">{{trans("Novalnet::PaymentMethod.sepa_bank_country_label")}}</label></div>
+        <div class="content" id='sepa_country_content' >
+        <select id="sepa_country" name="sepa_country" placeholder="- select -" title="Bank Country">
+			{% for country in nnCountry %}
+					<option value="{{country.code}}">{{country.name}}</option>
+    		{% endfor %}
+        </select>
+        </div>
+    </div>
+    <div class="sepa_iban-section">
+        <div class="label"><label for="sepa_iban">{{trans("Novalnet::PaymentMethod.sepa_iban_label")}}</label></div>
+        <div class="content">
+            <input type="text" id="sepa_iban" autocomplete="off" onkeypress="return ibanbic_validate(event, 'iban')">
+            <span id="novalnet_sepa_iban_span"></span>
+        </div>
+    </div>
+    <div class="sepa_bic-section">
+        <div class="label"><label for="sepa_bic">{{trans("Novalnet::PaymentMethod.sepa_bic_label")}}</label></div>
+        <div class="content">
+            <input type="text" id="sepa_bic" autocomplete="off" onkeypress="return ibanbic_validate(event, 'bic')">
+            <span id="novalnet_sepa_bic_span"></span>
+        </div>
+    </div>
+    <div class="novalnet_sepa_confirm_id-section">
+        <div class="label"></div>
+        <div class="content">
+            <input type="checkbox" id="novalnet_sepa_confirm_id" autocomplete="off" align='left'>
+            <label for="novalnet_sepa_confirm_id">{{trans("Novalnet::PaymentMethod.sepa_mandate_label")}}</label>
+        </div>
+        <div class="clear"></div>
+    </div> 
+    
+    {% if nnGuaranteeStatus == "guarantee" %}
+    	<div class="novalnet_sepa_dob-section">
+		<div class="label"><label for="sepa_bic">{{trans("Novalnet::PaymentMethod.birthdate_label")}}</label></div>
+		<div class="content">
+		    <input type="date" name="nn_sepa_birthday" id="nn_sepa_birthday" value="{{nnSepaDobValue}}">
+		</div>
+		<div class="clear"></div>
+    	</div> 
+    {% endif %}    
+	
+	
+	<button type="submit" class="btn btn-primary" id="novalnet_form_btn" onclick="">
+		{{ trans("Novalnet::PaymentMethod.submit_button_text") }}
+	</button>
+	<a href="/checkout">
+		<button type="button" class="btn btn-primary">
+			{{ trans("Novalnet::PaymentMethod.cancel_button_text") }}
+		</button>
+	</a>
+</form>
