@@ -103,3 +103,4 @@
   des § 55 Abs. 2 Rundfunkstaatsvertrag<br />
   für das Novalnet Magazin ist:<br />
   Marek Henschke<br />
+ 
