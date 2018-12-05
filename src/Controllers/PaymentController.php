@@ -109,6 +109,7 @@ class PaymentController extends Controller
     public function paymentResponse()
     
     {
+	    $this->getLogger(__METHOD__)->error('log1', 11);
         $requestData = $this->request->all();
         
         $requestData['payment_id'] = (!empty($requestData['payment_id'])) ? $requestData['payment_id'] : $requestData['key'];
@@ -121,9 +122,10 @@ class PaymentController extends Controller
                 'code'    => 0
             ]);
         $this->sessionStorage->getPlugin()->setValue('notifications', json_encode($notifications));
-
+$this->getLogger(__METHOD__)->error('log2', 22);
         if($isPaymentSuccess)
         {
+		$this->getLogger(__METHOD__)->error('log3', 33);
             if(!preg_match('/^[0-9]/', $requestData['test_mode']))
             {
                 $requestData['test_mode'] = $this->paymentHelper->decodeData($requestData['test_mode'], $requestData['uniqid']);
@@ -132,9 +134,10 @@ class PaymentController extends Controller
 
             $paymentRequestData = $this->sessionStorage->getPlugin()->getValue('nnPaymentData');
             $this->sessionStorage->getPlugin()->setValue('nnPaymentData', array_merge($paymentRequestData, $requestData));
-			
+			$this->getLogger(__METHOD__)->error('log4', 44);
 			if(in_array($requestData['payment_type'],['ONLINE_TRANSFER','PRZELEWY24','GIROPAY','EPS','IDEAL','PAYPAL']) || ($requestData['payment_type'] == 'CREDITCARD' && $this->config->get('Novalnet.cc_3d') == 'true' || $this->config->get('Novalnet.cc_3d_fraudcheck') == 'true') )
 				{
+				$this->getLogger(__METHOD__)->error('log5', 55);
 					$this->paymentService->validateResponse();
 				}
 
