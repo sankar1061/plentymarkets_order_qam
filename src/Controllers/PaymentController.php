@@ -111,7 +111,7 @@ class PaymentController extends Controller
     {
 	    $this->getLogger(__METHOD__)->error('log1', 11);
         $requestData = $this->request->all();
-        
+        $this->getLogger(__METHOD__)->error('logddd',$requestData);
         $requestData['payment_id'] = (!empty($requestData['payment_id'])) ? $requestData['payment_id'] : $requestData['key'];
         $isPaymentSuccess = isset($requestData['status']) && in_array($requestData['status'], ['90','100']);
 
