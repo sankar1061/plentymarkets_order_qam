@@ -82,7 +82,6 @@ class NovalnetServiceProvider extends ServiceProvider
                           PaymentMethodContainer $payContainer,
                           PaymentMethodRepositoryContract $paymentMethodService,
                           FrontendSessionStorageFactoryContract $sessionStorage,
-                          EventProceduresService $eventProceduresService,
                           TransactionService $transactionLogData,
                           Twig $twig,
                           ConfigRepository $config)
