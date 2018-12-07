@@ -27,6 +27,7 @@ use Plenty\Modules\Plugin\DataBase\Contracts\Model;
  * @property string  $transactionDatetime
  * @property string  $tid
  * @property string  $paymentName
+ * @property string  $transactionStatus
  */
 class TransactionLog extends Model
 {
