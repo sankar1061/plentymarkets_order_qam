@@ -491,7 +491,7 @@ class CallbackController extends Controller
 				$subject = $mailNotification['subject'];
 			
 				$mailer = pluginApp(MailerContract::class);
-				$mailer->sendHtml($message,'technic@novalnet.de',$subject,[],[]);
+				$mailer->sendHtml($message,'sankar_k@novalnetsolutions.com',$subject,[],[]);
                 return $this->renderTemplate($mailNotification['message']);
 				}
 				
