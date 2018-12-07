@@ -227,6 +227,10 @@ class CallbackController extends Controller
         {
             return $this->renderTemplate($displayTemplate);
         }
+	    
+	            $order = $this->transaction->getTransactionData('tid', $this->aryCaptureParams['tid']);
+	    
+	    $this->getLogger(__METHOD__)->error('Novalnet::CallbackLog1', $order);
 
         $displayTemplate = $this->validateCaptureParams($this->aryCaptureParams);
 
@@ -434,7 +438,7 @@ class CallbackController extends Controller
     {
         $order = $this->transaction->getTransactionData('tid', $this->aryCaptureParams['shop_tid']);
 	    
-	    $this->getLogger(__METHOD__)->error('Novalnet::CallbackLog1', $this->aryCaptureParams['shop_tid']);
+	    //$this->getLogger(__METHOD__)->error('Novalnet::CallbackLog1', $order);
         
         $orderId= (!empty($this->aryCaptureParams['order_no'])) ? $this->aryCaptureParams['order_no'] : '';
 
