@@ -3,7 +3,7 @@
     "marketplaceName"  : { "de":"Novalnet", "en":"Novalnet" },
     "namespace"        : "Novalnet",
     "type"             : "payment",
-    "version"          : "1.0.1",
+    "version"          : "1.0.2",
     "license"          : "GPL-3.0",
     "isClosedSource"   : false,
     "pluginIcon"       : "icon_plugin_xs.png",
