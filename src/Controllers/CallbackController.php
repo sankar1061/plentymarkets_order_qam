@@ -433,6 +433,8 @@ class CallbackController extends Controller
     public function getOrderDetails()
     {
         $order = $this->transaction->getTransactionData('tid', $this->aryCaptureParams['shop_tid']);
+	    
+	    $this->getLogger(__METHOD__)->error('Novalnet::CallbackLog', $order);
         
         $orderId= (!empty($this->aryCaptureParams['order_no'])) ? $this->aryCaptureParams['order_no'] : '';
 
