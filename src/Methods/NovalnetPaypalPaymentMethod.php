@@ -57,7 +57,7 @@ class NovalnetPaypalPaymentMethod extends PaymentMethodService
      */
     public function isActive():bool
     {
-        return (bool)(($this->configRepository->get('Novalnet.paypal_payment_active') == 'true') && is_numeric($this->paymentHelper->getNovalnetConfig('vendor_id')) && !empty($this->paymentHelper->getNovalnetConfig('auth_code')) && is_numeric($this->paymentHelper->getNovalnetConfig('product_id')) && is_numeric($this->paymentHelper->getNovalnetConfig('tariff_id')) && !empty($this->paymentHelper->getNovalnetConfig('access_key')));
+        return (bool)(($this->configRepository->get('Novalnet.novalnet_paypal_payment_active') == 'true') && is_numeric($this->paymentHelper->getNovalnetConfig('novalnet_vendor_id')) && !empty($this->paymentHelper->getNovalnetConfig('novalnet_auth_code')) && is_numeric($this->paymentHelper->getNovalnetConfig('novalnet_product_id')) && is_numeric($this->paymentHelper->getNovalnetConfig('novalnet_tariff_id')) && !empty($this->paymentHelper->getNovalnetConfig('novalnet_access_key')));
     }
 
     /**
@@ -68,8 +68,7 @@ class NovalnetPaypalPaymentMethod extends PaymentMethodService
      */
     public function getName():string
     {   
-        $name = trim($this->configRepository->get('Novalnet.paypal_payment_name'));
-        if(empty($name))
+        if(empty($name = trim($this->configRepository->get('Novalnet.novalnet_paypal_payment_name'))))
         {
             $name = $this->paymentHelper->getTranslatedText('paypal_name');
         }
@@ -95,8 +94,7 @@ class NovalnetPaypalPaymentMethod extends PaymentMethodService
      */
     public function getDescription():string
     {
-        $description = trim($this->configRepository->get('Novalnet.paypal_description'));
-        if(empty($description))
+        if(empty($description = trim($this->configRepository->get('Novalnet.novalnet_paypal_description'))))
         {
             $description = $this->paymentHelper->getTranslatedText('redirectional_payment_description');
         }

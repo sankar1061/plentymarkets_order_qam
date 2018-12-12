@@ -17,7 +17,6 @@ namespace Novalnet\Controllers;
 use Plenty\Plugin\ConfigRepository;
 use Plenty\Plugin\Controller;
 use Plenty\Plugin\Http\Request;
-
 use Novalnet\Helper\PaymentHelper;
 use Novalnet\Services\PaymentService;
 use Plenty\Plugin\Templates\Twig;
@@ -26,9 +25,9 @@ use Plenty\Plugin\Log\Loggable;
 use Plenty\Plugin\Mail\Contracts\MailerContract;
 use Plenty\Modules\Order\Contracts\OrderRepositoryContract;
 use \Plenty\Modules\Authorization\Services\AuthHelper;
+use Plenty\Modules\Payment\Contracts\PaymentRepositoryContract;
 use Plenty\Plugin\Translation\Translator;
 use \stdClass;
-
 
 /**
  * Class CallbackController
@@ -194,20 +193,17 @@ class CallbackController extends Controller
                                   OrderRepositoryContract $orderRepository
                                 )
     {
-        $this->config				= $config;
-        $this->paymentHelper		= $paymentHelper;
-        $this->paymentService		= $paymentService;
-        $this->twig					= $twig;
-        $this->transaction			= $tranactionService;
-        $this->orderRepository		= $orderRepository;
-        $this->aryCaptureParams		= $request->all();
-        $this->paramsRequired		= ['vendor_id', 'tid', 'payment_type', 'status', 'tid_status'];
-
-        if(!empty($this->aryCaptureParams['subs_billing']))
-        {
-            $this->paramsRequired[] = 'signup_tid';
-        }
-        elseif(isset($this->aryCaptureParams['payment_type']) && in_array($this->aryCaptureParams['payment_type'], array_merge($this->aryChargebacks, $this->aryCollection)))
+        $this->config               = $config;
+        $this->paymentHelper        = $paymentHelper;
+        $this->paymentService       = $paymentService;
+        $this->twig                 = $twig;
+        $this->transaction          = $tranactionService;
+        $this->orderRepository      = $orderRepository;
+        $this->aryCaptureParams     = $request->all();
+        $this->paramsRequired       = ['vendor_id', 'tid', 'payment_type', 'status', 'tid_status'];
+        
+        $this->validateCaptureParams($this->paramsRequired);
+        if(isset($this->aryCaptureParams['payment_type']) && in_array($this->aryCaptureParams['payment_type'], array_merge($this->aryChargebacks, $this->aryCollection)))
         {
             $this->paramsRequired[] = 'tid_payment';
         }
@@ -227,10 +223,6 @@ class CallbackController extends Controller
         {
             return $this->renderTemplate($displayTemplate);
         }
-	    
-	            $order = $this->transaction->getTransactionData('tid', $this->aryCaptureParams['tid']);
-	    
-	    $this->getLogger(__METHOD__)->error('Novalnet::CallbackLog1', $order);
 
         $displayTemplate = $this->validateCaptureParams($this->aryCaptureParams);
 
@@ -260,26 +252,22 @@ class CallbackController extends Controller
             {
                 return $this->renderTemplate($nnTransactionHistory);
             }
-            
-	
-		
-		$orderob = $this->orderObject($nnTransactionHistory->orderNo); 
-		
-		$orderLanguage= $this->orderLanguage($orderob);
 
+        $orderob = $this->orderObject($nnTransactionHistory->orderNo); 
+        
+        $orderLanguage= $this->orderLanguage($orderob);
 
             if($this->getPaymentTypeLevel() == 2 && $this->aryCaptureParams['tid_status'] == '100')
             {
                 // Credit entry for the payment types Invoice, Prepayment and Cashpayment.
                 if(in_array($this->aryCaptureParams['payment_type'], ['INVOICE_CREDIT', 'CASHPAYMENT_CREDIT']) && $this->aryCaptureParams['tid_status'] == 100)
                 {
-					
+                    
                     if($this->aryCaptureParams['subs_billing'] != 1)
                     {
-						
+                        
                         if ($nnTransactionHistory->order_paid_amount < $nnTransactionHistory->order_total_amount)
                         {
-	
                             $callbackComments  = '</br>';
                             $callbackComments .= sprintf($this->paymentHelper->getTranslatedText('callback_initial_execution',$orderLanguage), $this->aryCaptureParams['shop_tid'], ($this->aryCaptureParams['amount'] / 100), $this->aryCaptureParams['currency'], date('Y-m-d H:i:s'), $this->aryCaptureParams['tid'] ).'</br>';
 
@@ -366,7 +354,7 @@ class CallbackController extends Controller
                 {
                     // Przelewy24 cancel.
                     $callbackComments = '</br>' . sprintf($this->paymentHelper->getTranslatedText('callback_transaction_cancellation',$orderLanguage),$this->paymentHelper->getNovalnetStatusText($this->aryCaptureParams) ) . '</br>';
-                    $orderStatus = (float) $this->config->get('Novalnet.order_cancel_status');
+                    $orderStatus = (float) $this->config->get('Novalnet.novalnet_order_cancel_status');
                     $this->paymentHelper->updateOrderStatus($nnTransactionHistory->orderNo, $orderStatus);
                     $this->paymentHelper->createOrderComments($nnTransactionHistory->orderNo, $callbackComments);
                     $this->sendCallbackMail($callbackComments);
@@ -395,7 +383,7 @@ class CallbackController extends Controller
     public function validateIpAddress()
     {
         $client_ip = $this->paymentHelper->getRemoteAddress();
-        if(!in_array($client_ip, $this->ipAllowed) && $this->config->get('Novalnet.callback_test_mode') != 'true')
+        if(!in_array($client_ip, $this->ipAllowed) && $this->config->get('Novalnet.novalnet_callback_test_mode') != 'true')
         {
             return 'Novalnet callback received. Unauthorised access from the IP '. $client_ip;
         }
@@ -416,6 +404,7 @@ class CallbackController extends Controller
             {
                 if (empty($aryCaptureParams[$param]))
                 {
+            
                     return 'Required param ( ' . $param . '  ) missing!';
                 }
 
@@ -437,11 +426,9 @@ class CallbackController extends Controller
     public function getOrderDetails()
     {
         $order = $this->transaction->getTransactionData('tid', $this->aryCaptureParams['shop_tid']);
-	    
-	    //$this->getLogger(__METHOD__)->error('Novalnet::CallbackLog1', $order);
         
         $orderId= (!empty($this->aryCaptureParams['order_no'])) ? $this->aryCaptureParams['order_no'] : '';
-
+      
         if(!empty($order))
         {
             $orderDetails = $order[0]; // Setting up the order details fetched
@@ -484,31 +471,31 @@ class CallbackController extends Controller
             }
         }
         else
-		{ 
-			if(!empty($orderId))
-			{
-				$order_ref = $this->orderObject($orderId);
-				if(empty($order_ref))
-				{
-				$mailNotification = $this->build_notification_message();
-				$message = $mailNotification['message'];
-				$subject = $mailNotification['subject'];
-			
-				$mailer = pluginApp(MailerContract::class);
-				$mailer->sendHtml($message,'sankar_k@novalnetsolutions.com',$subject,[],[]);
+        { 
+            if(!empty($orderId))
+            {
+                $order_ref = $this->orderObject($orderId);
+                if(empty($order_ref))
+                {
+                $mailNotification = $this->build_notification_message();
+                $message = $mailNotification['message'];
+                $subject = $mailNotification['subject'];
+            
+                $mailer = pluginApp(MailerContract::class);
+                $mailer->sendHtml($message,'technic@novalnet.de',$subject,[],[]);
                 return $this->renderTemplate($mailNotification['message']);
-				}
-				
-			
-				 
-				$this->handleCommunicationBreak($order_ref);
-				return  $this->renderTemplate('Novalnet handlecommunication break executed successfully.');
-				
-			
-			}
-			else{
-					return 'Transaction mapping failed';
-				}
+                }
+                
+            
+                 
+                $this->handleCommunicationBreak($order_ref);
+                return  $this->renderTemplate('Novalnet handlecommunication break executed successfully.');
+                
+            
+            }
+            else{
+                    return 'Transaction mapping failed';
+                }
         }
 
         return $orderObj;
@@ -541,39 +528,39 @@ class CallbackController extends Controller
      */
     public function orderObject($orderId)
     {
-	  $orderId = (int)$orderId;
-		$authHelper = pluginApp(AuthHelper::class);
-				$order_ref = $authHelper->processUnguarded(
+      $orderId = (int)$orderId;
+        $authHelper = pluginApp(AuthHelper::class);
+                $order_ref = $authHelper->processUnguarded(
                 function () use ($orderId) {
-					$order_obj = $this->orderRepository->findOrderById($orderId);
-			
-					
-					return $order_obj;
-				});
-				
-				return $order_ref;
-		
-	}
-	
-	
-	/**
+                    $order_obj = $this->orderRepository->findOrderById($orderId);
+            
+                    
+                    return $order_obj;
+                });
+                
+                return $order_ref;
+        
+    }
+    
+    
+    /**
      * Get the order language based on the order object
      *
      * @return string
      */
-	public function orderLanguage($orderObj)
-	{
-		foreach($orderObj->properties as $property)
-		{
-			if($property->typeId == '6' )
-			{
-				$language = $property->value;
-		
-				
-				return $language;
-			}
-	    }
-	}
+    public function orderLanguage($orderObj)
+    {
+        foreach($orderObj->properties as $property)
+        {
+            if($property->typeId == '6' )
+            {
+                $language = $property->value;
+        
+                
+                return $language;
+            }
+        }
+    }
 
     /**
      * Get the callback payment level based on the payment type
@@ -624,12 +611,12 @@ class CallbackController extends Controller
     {
         try
         {
-            $enableTestMail = ($this->config->get('Novalnet.enable_email') == 'true');
+            $enableTestMail = ($this->config->get('Novalnet.novalnet_enable_email') == 'true');
 
             if($enableTestMail)
             {
-                $toAddress  = $this->config->get('Novalnet.email_to');
-                $bccAddress = $this->config->get('Novalnet.email_bcc');
+                $toAddress  = $this->config->get('Novalnet.novalnet_email_to');
+                $bccAddress = $this->config->get('Novalnet.novalnet_email_bcc');
                 $subject    = 'Novalnet Callback Script Access Report';
 
                 if(!empty($bccAddress))
@@ -668,64 +655,59 @@ class CallbackController extends Controller
      *
      * @param array $orderObj
      * @return none
-	 */
+     */
     public function handleCommunicationBreak($orderObj)
     
     {
-	    $orderlanguage = $this->orderLanguage($orderObj);
-	    
-		if(in_array($this->aryCaptureParams['payment_type'],array('PAYPAL', 'ONLINE_TRANSFER', 'IDEAL', 'GIROPAY', 'PRZELEWY24', 'EPS','CREDITCARD')))
-		foreach($orderObj->properties as $property)
-		{
-			
-			if($property->typeId == '3' && $this->paymentHelper->isNovalnetPaymentMethod($property->value))
-			{
-				
-				$requestData = $this->aryCaptureParams;
-				$requestData['lang'] = $orderlanguage; 
-				$requestData['mop']= $property->value;
-				$payment_type = (string)$this->paymentHelper->getPaymentKeyByMop($property->value);
-				$requestData['payment_id'] = $this->paymentService->getkeyByPaymentKey($payment_type); 
-					
-					$transactionData						= pluginApp(stdClass::class);
-					
-                    $transactionData->paymentName			= $this->paymentHelper->getPaymentNameByResponse($requestData['payment_id']);  
-                    $transactionData->orderNo				= $requestData['order_no'];
-                    $transactionData->order_total_amount	= $requestData['amount'];
-							
-					
-					
-				if($this->aryCaptureParams['status'] == '100' && in_array($this->aryCaptureParams['tid_status'],array(85,86,90,100)))
-				{
-					
-					$this->paymentService->executePayment($requestData);
-                    $this->saveTransactionLog($transactionData);
-					
-					
-				}
-				else{
-					$requestData['type'] = 'cancel';
-					$this->paymentService->executePayment($requestData,true);
-					$this->aryCaptureParams['amount'] = '0';
-					
-					 $this->saveTransactionLog($transactionData);
-					
+        $orderlanguage = $this->orderLanguage($orderObj);
+        
+        if(in_array($this->aryCaptureParams['payment_type'],array('PAYPAL', 'ONLINE_TRANSFER', 'IDEAL', 'GIROPAY', 'PRZELEWY24', 'EPS','CREDITCARD')))
+        foreach($orderObj->properties as $property)
+        {
+            
+            if($property->typeId == '3' && $this->paymentHelper->getPaymentKeyByMop($property->value))
+            {
+                
+                $requestData = $this->aryCaptureParams;
+                $requestData['lang'] = $orderlanguage; 
+                $requestData['mop']= $property->value;
+                $payment_type = (string)$this->paymentHelper->getPaymentKeyByMop($property->value);
+                $requestData['payment_id'] = $this->paymentService->getkeyByPaymentKey($payment_type); 
+                    
+                    $transactionData                        = pluginApp(stdClass::class);
+                    
+                    $transactionData->paymentName           = $this->paymentHelper->getPaymentNameByResponse($requestData['payment_id']);  
+                    $transactionData->orderNo               = $requestData['order_no'];
+                    $transactionData->order_total_amount    = $requestData['amount'];
 
-					}
-					$callbackComments = $this->paymentHelper->getTranslatedText('callback_handlecommunication',$requestData['lang']). date('Y-m-d H:i:s');
-					
-					$this->paymentHelper->createOrderComments($this->aryCaptureParams['order_no'], $callbackComments);
-					$this->sendCallbackMail($callbackComments);
-					return $this->renderTemplate($callbackComments);
-					
-		
-			} else {
-					
-				return 'Novalnet callback received: Given payment type is not matched.';
-			}
-	}
-	return $this->renderTemplate('Novalnet_callback script executed.');
-		
-	}
-	
+                if($this->aryCaptureParams['status'] == '100' && in_array($this->aryCaptureParams['tid_status'],array(85,86,90,100)))
+                {
+                    
+                    $this->paymentService->executePayment($requestData);
+                    $this->saveTransactionLog($transactionData);
+                    
+                }
+                else{
+                    $requestData['type'] = 'cancel';
+                    $this->paymentService->executePayment($requestData,true);
+                    $this->aryCaptureParams['amount'] = '0';
+                    
+                     $this->saveTransactionLog($transactionData);
+                    
+                    }
+                    $callbackComments = $this->paymentHelper->getTranslatedText('callback_handlecommunication',$requestData['lang']). date('Y-m-d H:i:s');
+                    
+                    $this->paymentHelper->createOrderComments($this->aryCaptureParams['order_no'], $callbackComments);
+                    $this->sendCallbackMail($callbackComments);
+                    return $this->renderTemplate($callbackComments);
+                    
+            } else {
+                    
+                return 'Novalnet callback received: Given payment type is not matched.';
+            }
+    }
+    return $this->renderTemplate('Novalnet_callback script executed.');
+        
+    }
+    
 }

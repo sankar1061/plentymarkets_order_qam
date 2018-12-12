@@ -35,24 +35,24 @@ class NovalnetOrderConfirmationDataProvider
      * Setup the Novalnet transaction comments for the requested order
      *
      * @param Twig $twig
-     * @param Arguments $arg 
+     * @param Arguments $arg
      * @param PaymentRepositoryContract $paymentRepositoryContract
      * @return string
      */
     public function call(Twig $twig, PaymentRepositoryContract $paymentRepositoryContract, $arg)
     {
         $paymentHelper = pluginApp(PaymentHelper::class);
-		$sessionStorage = pluginApp(FrontendSessionStorageFactoryContract::class);
-		
+        $sessionStorage = pluginApp(FrontendSessionStorageFactoryContract::class);
+
         $order = $arg[0];
-  
-		$barzahlentoken =	(string)$sessionStorage->getPlugin()->getValue('cashtoken');
-		$testmode 		=	(string)$sessionStorage->getPlugin()->getValue('testmode');
-		$payments		=	$paymentRepositoryContract->getPaymentsByOrderId($order['id']);
-		
+
+        $barzahlentoken =   (string)$sessionStorage->getPlugin()->getValue('cashtoken');
+        $testmode       =   (string)$sessionStorage->getPlugin()->getValue('testmode');
+        $payments       =   $paymentRepositoryContract->getPaymentsByOrderId($order['id']);
+
         foreach($payments as $payment)
         {
-            if($paymentHelper->isNovalnetPaymentMethod($payment->mopId))
+            if($paymentHelper->getPaymentKeyByMop($payment->mopId))
             {
                 $orderId = (int) $payment->order['orderId'];
 
@@ -70,7 +70,7 @@ class NovalnetOrderConfirmationDataProvider
                     $comment .= (string)$data->text;
                     $comment .= '</br>';
                 }
-		  
+
               $payment_type = (string)$paymentHelper->getPaymentKeyByMop($payment->mopId);
 
                 return $twig->render('Novalnet::NovalnetOrderHistory', ['comments' => html_entity_decode($comment),'barzahlentoken' => html_entity_decode($barzahlentoken),'payment_type' => html_entity_decode($payment_type),'testmode' => html_entity_decode($testmode)]);

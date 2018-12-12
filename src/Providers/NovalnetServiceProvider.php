@@ -31,7 +31,6 @@ use Novalnet\Services\PaymentService;
 use Novalnet\Services\TransactionService;
 use Plenty\Plugin\Templates\Twig;
 use Plenty\Plugin\ConfigRepository;
-use Novalnet\Procedures\RefundEventProcedure;
 
 use Novalnet\Methods\NovalnetInvoicePaymentMethod;
 use Novalnet\Methods\NovalnetPrepaymentPaymentMethod;
@@ -74,6 +73,8 @@ class NovalnetServiceProvider extends ServiceProvider
      * @param PaymentMethodRepositoryContract $paymentMethodService
      * @param FrontendSessionStorageFactoryContract $sessionStorage
      * @param TransactionService $transactionLogData
+     * @param Twig $twig
+     * @param ConfigRepository $config
      */
     public function boot( Dispatcher $eventDispatcher,
                           PaymentHelper $paymentHelper,
@@ -155,12 +156,11 @@ class NovalnetServiceProvider extends ServiceProvider
                 AfterBasketCreate::class
             ]);
             
-
         // Listen for the event that gets the payment method content
         $eventDispatcher->listen(GetPaymentMethodContent::class,
                 function(GetPaymentMethodContent $event) use($paymentHelper, $paymentService, $basketRepository, $paymentMethodService, $sessionStorage, $twig)
                 {
-                    if($paymentHelper->isNovalnetPaymentMethod($event->getMop()))
+                    if($paymentHelper->getPaymentKeyByMop($event->getMop()))
                     {
                         $paymentKey = $paymentHelper->getPaymentKeyByMop($event->getMop());
                         if(in_array($paymentKey, ['NOVALNET_INVOICE', 'NOVALNET_PREPAYMENT', 'NOVALNET_CASHPAYMENT']))
@@ -188,6 +188,7 @@ class NovalnetServiceProvider extends ServiceProvider
                                     $contentType = 'htmlContent';
                                  }
                             }
+                
                             if($processDirect)
                             {
                                 $serverRequestData = $paymentService->getRequestParameters($basketRepository->load(), $paymentKey);
@@ -197,12 +198,13 @@ class NovalnetServiceProvider extends ServiceProvider
                                 $responseData['payment_id'] = (!empty($responseData['payment_id'])) ? $responseData['payment_id'] : $responseData['key'];
                                 $sessionStorage->getPlugin()->setValue('nnPaymentData', array_merge($serverRequestData['data'], $responseData));
                                 $isPaymentSuccess = isset($responseData['status']) && in_array($responseData['status'], ['90','100']);
-                                $notifications = json_decode($sessionStorage->getPlugin()->getValue('notifications'));
+                                $notifications = json_decode($sessionStorage->getPlugin()->getValue('notifications'));                  
                                 array_push($notifications,[
                                         'message' => $paymentHelper->getNovalnetStatusText($responseData),
                                         'type'    => $isPaymentSuccess ? 'success' : 'error',
                                         'code'    => ''
                                     ]);
+                  
                                 $sessionStorage->getPlugin()->setValue('notifications', json_encode($notifications));
                                 $content = '';
                                 $contentType = 'continue';
@@ -214,13 +216,6 @@ class NovalnetServiceProvider extends ServiceProvider
                                 $paymentProcessUrl = $paymentService->getProcessPaymentUrl();
                                 $nnDetails = [];
                                 $contentType = 'htmlContent';
-                                $nnDetails['vendor'] = $paymentHelper->getNovalnetConfig('vendor_id');
-                                $nnDetails['authcode'] = $paymentHelper->getNovalnetConfig('auth_code');
-                                $nnDetails['sepauniqueid'] = uniqid();
-                                $nnDetails['sepavendormsg'] = $paymentHelper->getTranslatedText('sepa_vendormsg');
-                                $nnDetails['sepacardmsg'] = $paymentHelper->getTranslatedText('sepa_cardmsg');
-                                $nnDetails['sepaacceptmandate'] = $paymentHelper->getTranslatedText('sepa_acceptmandate');
-                                $nnDetails['sepacountryerror'] = $paymentHelper->getTranslatedText('sepa_countryerror');
                                 $nnDetails['sepadoberror'] = $paymentHelper->getTranslatedText('doberror');
                                 $nnCountryList = $paymentHelper->getCountryList($sessionStorage->getLocaleSettings()->language);
                                 $guaranteeStatus = $paymentService->getGuaranteeStatus($basketRepository->load(), $paymentKey);
@@ -233,19 +228,18 @@ class NovalnetServiceProvider extends ServiceProvider
                                 else
                                 {
                                 $content = $twig->render('Novalnet::PaymentForm.Sepa', [
-                                                                                'nnPaymentProcessUrl' => $paymentProcessUrl,
-                                                                                'paymentMopKey'     =>  $paymentKey,
-                                                'nnSepaHiddenValue' => $nnDetails,
-                                                'nnGuaranteeStatus' => $guaranteeStatus,
-                                                                                'nnCountry' =>$nnCountryList
+                                                                    'nnPaymentProcessUrl' => $paymentProcessUrl,
+                                                                    'paymentMopKey'     =>  $paymentKey,
+                                                                    'nnSepaHiddenValue' => $nnDetails,
+                                                                    'nnGuaranteeStatus' => $guaranteeStatus,
                                                  ]);
                                 }
                             }
                             else
                             {
                                 $paymentProcessUrl = $paymentService->getProcessPaymentUrl();
-                                $encodedKey = base64_encode(trim($paymentHelper->getNovalnetConfig('activation_key')) . '&' . $paymentHelper->getRemoteAddress() . '&' . $paymentHelper->getServerAddress());
-                                $nnIframeSource = 'https://secure.novalnet.de/cc?signature=' . $encodedKey . '&ln=' . $sessionStorage->getLocaleSettings()->language;
+                                $encodedKey = base64_encode('vendor='.$paymentHelper->getNovalnetConfig('novalnet_vendor_id').'&product='.$paymentHelper->getNovalnetConfig('novalnet_product_id').'&server_ip='.$paymentHelper->getServerAddress().'&lang='.$sessionStorage->getLocaleSettings()->language);
+                                $nnIframeSource = 'https://secure.novalnet.de/cc?api=' . $encodedKey . '&ln=' . $sessionStorage->getLocaleSettings()->language;
                                 $nnFormDesign = $paymentService->getCcDesignConfig();
                                 $content = $twig->render('Novalnet::PaymentForm.Cc', [
                                                                     'nnCcFormUrl' => $nnIframeSource,
@@ -255,17 +249,15 @@ class NovalnetServiceProvider extends ServiceProvider
                                        ]);
                                 $contentType = 'htmlContent';
                             }
-
                         }
                         else
                         {
                             $serverRequestData = $paymentService->getRequestParameters($basketRepository->load(), $paymentKey);
                             $sessionStorage->getPlugin()->setValue('nnPaymentData', $serverRequestData['data']);
                             $sessionStorage->getPlugin()->setValue('nnPaymentUrl', $serverRequestData['url']);
-							$content='';
-							$contentType='continue';
-                           
-
+                            $content='';
+                            $contentType='continue';
+                          
                         }
 
                         $event->setValue($content);
@@ -276,34 +268,28 @@ class NovalnetServiceProvider extends ServiceProvider
         // Listen for the event that executes the payment
         $eventDispatcher->listen(ExecutePayment::class,
             function (ExecutePayment $event) use ($paymentHelper, $paymentService, $sessionStorage, $transactionLogData,$config,$basketRepository)
-            {
-				
-			if($paymentHelper->isNovalnetPaymentMethod($event->getMop()))
+            {   
+            if($paymentHelper->getPaymentKeyByMop($event->getMop()))
                {
-				$sessionStorage->getPlugin()->setValue('nnOrderNo',$event->getOrderId());
-				$sessionStorage->getPlugin()->setValue('mop',$event->getMop());
-				$paymentKey = $paymentHelper->getPaymentKeyByMop($event->getMop());
-				$sessionStorage->getPlugin()->setValue('paymentkey', $paymentKey);
-				   
-				  if(in_array($paymentKey,['NOVALNET_INVOICE','NOVALNET_SEPA','NOVALNET_PREPAYMENT','NOVALNET_CASHPAYMENT']) ||($paymentKey == 'NOVALNET_CC' && $config->get('Novalnet.cc_3d') != 'true' && $config->get('Novalnet.cc_3d_fraudcheck') != 'true'))
-					{
-						$paymentService->validateResponse();
-					}
-				    
-				    
-				    if(in_array($paymentKey,['NOVALNET_SOFORT','NOVALNET_PRZELEWY','NOVALNET_GIROPAY','NOVALNET_EPS','NOVALNET_IDEAL','NOVALNET_PAYPAL']) || ($paymentKey == 'NOVALNET_CC' && ($config->get('Novalnet.cc_3d') == 'true' || $config->get('Novalnet.cc_3d_fraudcheck') == 'true')))
-				    {
-						$paymentProcessUrl = $paymentService->getRedirectPaymentUrl();
-						$event->setType('redirectUrl');
-						$event->setValue($paymentProcessUrl);
-					
-						
-					}
-					
-	
-				}
-				
-		
+                
+                $sessionStorage->getPlugin()->setValue('nnOrderNo',$event->getOrderId());
+                $sessionStorage->getPlugin()->setValue('mop',$event->getMop());
+                $paymentKey = $paymentHelper->getPaymentKeyByMop($event->getMop());
+                $sessionStorage->getPlugin()->setValue('paymentkey', $paymentKey);
+                   
+                  if(in_array($paymentKey,['NOVALNET_INVOICE','NOVALNET_SEPA','NOVALNET_PREPAYMENT','NOVALNET_CASHPAYMENT']) ||($paymentKey == 'NOVALNET_CC' && $config->get('Novalnet.novalnet_cc_3d') != 'true' && $config->get('Novalnet.novalnet_cc_3d_fraudcheck') != 'true'))
+                    {  
+                        $paymentService->validateResponse();
+                      
+                    } else {
+                        $paymentProcessUrl = $paymentService->getRedirectPaymentUrl();
+                        $event->setType('redirectUrl');
+                        $event->setValue($paymentProcessUrl);
+                    
+                    }
+                    
+                }
+                
             }
         );
     }

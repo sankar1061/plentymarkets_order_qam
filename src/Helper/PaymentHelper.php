@@ -29,7 +29,6 @@ use Plenty\Modules\Comment\Contracts\CommentRepositoryContract;
 use Plenty\Modules\Order\Shipping\Countries\Contracts\CountryRepositoryContract;
 use Plenty\Modules\Frontend\Session\Storage\Contracts\FrontendSessionStorageFactoryContract;
 
-
 /**
  * Class PaymentHelper
  *
@@ -80,13 +79,13 @@ class PaymentHelper
     * @var $countryRepository
     */
     private $countryRepository;
-    
+
     /**
     *
     * @var $sessionStorage
     */
     private $sessionStorage;
-    
+
     /**
      * Constructor.
      *
@@ -95,6 +94,9 @@ class PaymentHelper
      * @param OrderRepositoryContract $orderRepository
      * @param PaymentOrderRelationRepositoryContract $paymentOrderRelationRepository
      * @param CommentRepositoryContract $orderComment
+     * @param ConfigRepository $configRepository
+     * @param FrontendSessionStorageFactoryContract $sessionStorage
+     * @param CountryRepositoryContract $countryRepository
      */
     public function __construct(PaymentMethodRepositoryContract $paymentMethodRepository,
                                 PaymentRepositoryContract $paymentRepository,
@@ -112,9 +114,8 @@ class PaymentHelper
         $this->paymentOrderRelationRepository = $paymentOrderRelationRepository;
         $this->orderComment                   = $orderComment;
         $this->config                         = $configRepository;
-        $this->sessionStorage				  = $sessionStorage;
+        $this->sessionStorage                 = $sessionStorage;
         $this->countryRepository              = $countryRepository;
-        
     }
 
     /**
@@ -139,8 +140,7 @@ class PaymentHelper
         }
         return 'no_paymentmethod_found';
     }
-    
- 
+
     /**
      * Load the ID of the payment method
      * Return the payment key for the payment method found
@@ -158,29 +158,6 @@ class PaymentHelper
                 if($paymentMethod->id == $mop)
                 {
                     return $paymentMethod->paymentKey;
-                }
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Load the ID of the payment method
-     * Return true for the payment method found
-     *
-     * @return bool
-     */
-    public function isNovalnetPaymentMethod($mop)
-    {
-        $paymentMethods = $this->paymentMethodRepository->allForPlugin('plenty_novalnet');
-
-        if(!is_null($paymentMethods))
-        {
-            foreach($paymentMethods as $paymentMethod)
-            {
-                if($paymentMethod->id == $mop)
-                {
-                    return true;
                 }
             }
         }
@@ -207,11 +184,9 @@ class PaymentHelper
         $transactionId = $requestData['tid'];
         if(!empty($requestData['type']) && $requestData['type'] == 'debit')
         {
-			
             $payment->type = $requestData['type'];
             $payment->status = Payment::STATUS_REFUNDED;
-			
-		}
+        }
 
         $paymentProperty     = [];
         $paymentProperty[]   = $this->getPaymentProperty(PaymentProperty::TYPE_BOOKING_TEXT, $transactionId);
@@ -283,8 +258,7 @@ class PaymentHelper
                     function () use ($orderId, $statusId) {
                     //unguarded
                     $order = $this->orderRepository->findOrderById($orderId);
-                   
-			
+
                     if (!is_null($order) && $order instanceof Order) {
                         $status['statusId'] = (float) $statusId;
                         $this->orderRepository->updateOrder($status, $orderId);
@@ -304,6 +278,8 @@ class PaymentHelper
      */
     public function createOrderComments($orderId, $text)
     {
+                    $this->getLogger(__METHOD__)->error('Novalnet::createOrderComments1', $text);
+
         try {
             $authHelper = pluginApp(AuthHelper::class);
             $authHelper->processUnguarded(
@@ -328,7 +304,6 @@ class PaymentHelper
      */
     public function getNovalnetStatusText($response)
     {
-		
        return ((!empty($response['status_desc'])) ? $response['status_desc'] : ((!empty($response['status_text'])) ? $response['status_text'] : ((!empty($response['status_message']) ? $response['status_message'] : $this->getTranslatedText('payment_not_success')))));
     }
 
@@ -347,6 +322,13 @@ class PaymentHelper
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_POST, 1);
         curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
+        $gateway_timeout = $this->getNovalnetConfig('novalnet_gateway_timeout');
+        $curlTimeOut  = (!empty($gateway_timeout) && $gateway_timeout > 240) ? $gateway_timeout : 240;
+        curl_setopt($curl, CURLOPT_TIMEOUT, $curlTimeOut);
+
+        if (!empty($this->getNovalnetConfig('novalnet_proxy_server'))) {
+           curl_setopt($curl, CURLOPT_PROXY, $this->getNovalnetConfig('novalnet_proxy_server'));
+    }
         $response = curl_exec($curl);
         $errorText = curl_error($curl);
         curl_close($curl);
@@ -364,18 +346,17 @@ class PaymentHelper
      */
     public function getDisplayPaymentMethodName($requestData)
     {
-		$lang = strtolower((string)$requestData['lang']);
-		 
+        $lang = strtolower((string)$requestData['lang']);
+
         if ($requestData['invoice_type'])
         {
+            $payment_name = 'prepayment_name';
             if ($requestData['invoice_type'] == 'INVOICE')
             {
-                return $this->getTranslatedText('invoice_name',$lang);
-            }
-            else
-            {
-                return $this->getTranslatedText('prepayment_name',$lang);
-            }
+                $payment_name = $this->getTranslatedText('invoice_name',$lang);
+        }
+                return $this->getTranslatedText($payment_name, $lang);
+
         }
 
         $paymentMethodDisplayName = [
@@ -446,7 +427,7 @@ class PaymentHelper
      */
     public function encodeData($data, $uniqid)
     {
-        $accessKey = $this->getNovalnetConfig('access_key');
+        $accessKey = $this->getNovalnetConfig('novalnet_access_key');
 
         # Encryption process
         $encodedData = htmlentities(base64_encode(openssl_encrypt($data, "aes-256-cbc", $accessKey, 1, $uniqid)));
@@ -465,7 +446,7 @@ class PaymentHelper
      */
     public function decodeData($data, $uniqid)
     {
-        $accessKey = $this->getNovalnetConfig('access_key');
+        $accessKey = $this->getNovalnetConfig('novalnet_access_key');
 
         # Decryption process
         $decodedData = openssl_decrypt(base64_decode($data), "aes-256-cbc", $accessKey, 1, $uniqid);
@@ -488,7 +469,7 @@ class PaymentHelper
             return 'Error: Function n/a';
         }
 
-        $accessKey = $this->getNovalnetConfig('access_key');
+        $accessKey = $this->getNovalnetConfig('novalnet_access_key');
         $strRevKey = $this->reverseString($accessKey);
 
         # Generates a hash to be sent with the sha256 mechanism
@@ -522,8 +503,8 @@ class PaymentHelper
     public function getTranslatedText($key,$lang = null)
     {
         $translator = pluginApp(Translator::class);
-        
-        return $lang == null ? $translator->trans("Novalnet::PaymentMethod.$key") : $translator->trans("Novalnet::PaymentMethod.$key",[],"$lang");
+
+        return $lang == null ? $translator->trans("Novalnet::PaymentMethod.$key") : $translator->trans("Novalnet::PaymentMethod.$key",[], $lang);
     }
 
     /**
@@ -560,8 +541,7 @@ class PaymentHelper
             {
                 foreach (explode(',', $_SERVER[$key]) as $ip)
                 {
-                    // Trim for safety measures
-                    return trim(filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) ? '127.0.0.1' : $ip);
+                    return $ip;
                 }
             }
         }
@@ -574,10 +554,7 @@ class PaymentHelper
      */
     public function getServerAddress()
     {
-    $ip = $_SERVER['SERVER_ADDR'];
-
-        // Trim for safety measures
-        return trim(filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) ? '127.0.0.1' : $ip);
+        return $_SERVER['SERVER_ADDR'];;
     }
 
     /**
@@ -613,7 +590,7 @@ class PaymentHelper
     * @param string $delimeter
     * @return array
     */
-    public function convertStringToArray($string, $delimeter='&')
+    public function convertStringToArray($string, $delimeter)
     {
         $data = [];
         $elem = explode($delimeter, $string);
@@ -629,6 +606,7 @@ class PaymentHelper
     /**
     * Get the List of countries
     *
+    * @param string $ln
     * @return array
     */
     public function getCountryList($ln)

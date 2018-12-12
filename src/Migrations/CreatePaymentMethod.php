@@ -59,21 +59,21 @@ class CreatePaymentMethod
     
     
     /**
-	 * Create payment method with given parameters if it doesn't exist
-	 *
-	 * @param string $paymentKey
-	 * @param string $name
-	 */
+     * Create payment method with given parameters if it doesn't exist
+     *
+     * @param string $paymentKey
+     * @param string $name
+     */
     private function createNovalnetPaymentMethodByPaymentKey($paymentKey, $name)
-	{        
+    {        
        
             if ($this->paymentHelper->getPaymentMethodByKey($paymentKey) == 'no_paymentmethod_found')
-			{
-				$paymentMethodData = ['pluginKey'  => 'plenty_novalnet',
+            {
+                $paymentMethodData = ['pluginKey'  => 'plenty_novalnet',
                                   'paymentKey' => $paymentKey,
                                   'name'       => $name];
                                   
-				$this->paymentMethodRepository->createPaymentMethod($paymentMethodData);
-			}    
+                $this->paymentMethodRepository->createPaymentMethod($paymentMethodData);
+            }    
     }
 }

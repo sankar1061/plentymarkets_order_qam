@@ -19,7 +19,7 @@ To set up the merchant credentials, navigate to the path **Plugins -> Plugin ove
 ### Novalnet Global Configuration
 
 - Fill in your Novalnet merchant account details to make the payment method appear in the online store.
-- The fields **Merchant ID**, **Authentication code**, **Project ID**, **Tariff ID** and **Payment access key** are necessary and also marked mandatory.
+- The fields **Activation Key**, **Merchant ID**, **Authentication code**, **Project ID**, **Tariff ID** and **Payment access key** are necessary and also marked mandatory.
 - These values can be retrieved from the [Novalnet administration portal](https://admin.novalnet.de/).
 - After filling those values in the respective fields, you must check the option **Enable payment method** to complete the Novalnet payment setup in your store.
 

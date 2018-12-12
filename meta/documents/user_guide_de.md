@@ -19,7 +19,7 @@ Zur Einrichtung rufen Sie den Menüpunkt **Plugins -> Plugin-Übersicht -> Noval
 ### Novalnet Haupteinstellungen
 
 - Geben Sie Ihre Novalnet Login Daten ein, um die Zahlungsmethode in Ihrem Shop sichtbar zu machen.
-- Die Eingabefelder **Merchant ID**, **Authentication code**, **Project ID**, **Tariff ID** und **Payment access key** sind Pflichtfelder.
+- Die Eingabefelder **Aktivierungsschlüssel**, **Merchant ID**, **Authentication code**, **Project ID**, **Tariff ID** und **Payment access key** sind Pflichtfelder.
 - Diese Daten sind im [Novalnet Händler Administrationsportal ersichtlich](https://admin.novalnet.de/).
 - Um die Einrichtung von Novalnet in Ihrem Shop abzuschließen, bestätigen Sie bitte nach der Eingabe der Daten in den jeweiligen Feldern den Menüpunkt **Enable payment method**.
 

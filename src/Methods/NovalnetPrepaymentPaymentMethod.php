@@ -57,7 +57,7 @@ class NovalnetPrepaymentPaymentMethod extends PaymentMethodService
      */
     public function isActive():bool
     {
-        return (bool)(($this->configRepository->get('Novalnet.prepayment_payment_active') == 'true') && is_numeric($this->paymentHelper->getNovalnetConfig('vendor_id')) && !empty($this->paymentHelper->getNovalnetConfig('auth_code')) && is_numeric($this->paymentHelper->getNovalnetConfig('product_id')) && is_numeric($this->paymentHelper->getNovalnetConfig('tariff_id')) && !empty($this->paymentHelper->getNovalnetConfig('access_key')));
+        return (bool)(($this->configRepository->get('Novalnet.novalnet_prepayment_payment_active') == 'true') && is_numeric($this->paymentHelper->getNovalnetConfig('novalnet_vendor_id')) && !empty($this->paymentHelper->getNovalnetConfig('novalnet_auth_code')) && is_numeric($this->paymentHelper->getNovalnetConfig('novalnet_product_id')) && is_numeric($this->paymentHelper->getNovalnetConfig('novalnet_tariff_id')) && !empty($this->paymentHelper->getNovalnetConfig('novalnet_access_key')));
     }
 
     /**
@@ -67,9 +67,8 @@ class NovalnetPrepaymentPaymentMethod extends PaymentMethodService
      * @return string
      */
     public function getName():string
-    {   
-        $name = trim($this->configRepository->get('Novalnet.prepayment_payment_name'));
-        if(empty($name))
+    {  
+        if(empty($name = trim($this->configRepository->get('Novalnet.novalnet_prepayment_payment_name'))))
         {
             $name = $this->paymentHelper->getTranslatedText('prepayment_name');
         }
@@ -95,8 +94,7 @@ class NovalnetPrepaymentPaymentMethod extends PaymentMethodService
      */
     public function getDescription():string
     {
-        $description = trim($this->configRepository->get('Novalnet.prepayment_description'));
-        if(empty($description))
+        if(empty($description = trim($this->configRepository->get('Novalnet.novalnet_prepayment_description'))))
         {
             $description = $this->paymentHelper->getTranslatedText('invoice_prepayment_payment_description');
         }
