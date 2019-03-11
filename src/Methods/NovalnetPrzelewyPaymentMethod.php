@@ -59,7 +59,7 @@ class NovalnetPrzelewyPaymentMethod extends PaymentMethodService
      */
     public function isActive():bool
     {
-        return (bool)(($this->configRepository->get('Novalnet.novalnet_przelewy_payment_active')) && $this->paymentHelper->paymentActive());
+        return (bool)(($this->configRepository->get('Novalnet.novalnet_przelewy_payment_active') == 'true') && $this->paymentHelper->paymentActive());
     }
 
     /**

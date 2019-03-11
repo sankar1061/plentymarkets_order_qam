@@ -262,17 +262,16 @@ class CallbackController extends Controller
 			return $this->renderTemplate($displayTemplate);
 		}
 
-		if(!empty($this->aryCaptureParams['signup_tid']))
-		{   // Subscription
-			$this->aryCaptureParams['shop_tid'] = $this->aryCaptureParams['signup_tid'];
-		}
-		else if(in_array($this->aryCaptureParams['payment_type'], array_merge($this->aryChargebacks, $this->aryCollection)))
+		$this->aryCaptureParams['shop_tid'] = $this->aryCaptureParams['tid'];
+
+		if(in_array($this->aryCaptureParams['payment_type'], array_merge($this->aryChargebacks, $this->aryCollection)))
 		{
 			$this->aryCaptureParams['shop_tid'] = $this->aryCaptureParams['tid_payment'];
 		}
-		else if(!empty($this->aryCaptureParams['tid']))
-		{
-			$this->aryCaptureParams['shop_tid'] = $this->aryCaptureParams['tid'];
+
+		if(!empty($this->aryCaptureParams['signup_tid']) && isset($this->aryCaptureParams['subs_billing']) && $this->aryCaptureParams['subs_billing'] == 1)
+		{   // Subscription
+			$this->aryCaptureParams['shop_tid'] = $this->aryCaptureParams['signup_tid'];
 		}
 
 		if(empty($this->aryCaptureParams['vendor_activation']))
@@ -290,8 +289,8 @@ class CallbackController extends Controller
 		
 			if ($this->aryCaptureParams['payment_type'] == 'TRANSACTION_CANCELLATION')
 			{
-				$transaction_status = $this->payment_details($nnTransactionHistory->orderNo);
-				if ($this->aryCaptureParams['status']!= '100' && in_array($transaction_status, ['75', '91', '99'])) 
+				$transactionStatus = $this->payment_details($nnTransactionHistory->orderNo);
+				if ($this->aryCaptureParams['status']!= '100' && in_array($transactionStatus, ['75', '91', '99'])) 
 				{
 					$callbackComments  = '</br>';
 					$callbackComments .= '</br>' . sprintf($this->paymentHelper->getTranslatedText('callback_transaction_cancellation',$orderLanguage),date('d.m.Y'), date('H:i:s'));
@@ -407,10 +406,10 @@ class CallbackController extends Controller
 					}
 				}  elseif (in_array($this->aryCaptureParams['payment_type'], ['INVOICE_START', 'GUARANTEED_INVOICE', 'DIRECT_DEBIT_SEPA', 'GUARANTEED_DIRECT_DEBIT_SEPA'] )) {
 				
-					$transaction_status = $this->payment_details($nnTransactionHistory->orderNo);
+					$transactionStatus = $this->payment_details($nnTransactionHistory->orderNo);
 			  
 					// Checks for Guarantee Onhold
-					if(in_array($this->aryCaptureParams['tid_status'], ['91', '99']) && $transaction_status == '75') {
+					if(in_array($this->aryCaptureParams['tid_status'], ['91', '99']) && $transactionStatus == '75') {
 					   
 						$callbackComments = '</br>' . sprintf($this->paymentHelper->getTranslatedText('callback_pending_to_onhold_status_change',$orderLanguage), $this->aryCaptureParams['tid'], date('d.m.Y'), date('H:i:s'));
 						
@@ -418,7 +417,7 @@ class CallbackController extends Controller
 						$orderStatus = ($this->aryCaptureParams['payment_type'] == 'GUARANTEED_INVOICE') ? $this->config->get('Novalnet.novalnet_invoice_callback_order_status') : $this->config->get('Novalnet.novalnet_sepa_order_completion_status');
 						$this->paymentHelper->updateOrderStatus($nnTransactionHistory->orderNo, (float)$orderStatus);
 			
-					} elseif ($this->aryCaptureParams['tid_status'] == '100' && in_array($transaction_status, [ '75', '91', '99' ])) {
+					} elseif ($this->aryCaptureParams['tid_status'] == '100' && in_array($transactionStatus, [ '75', '91', '99' ])) {
 						$orderStatus = $this->config->get('Novalnet.novalnet_order_completion_status');	
 					// Checks Guaranteed Invoice
 						if( in_array ( $this->aryCaptureParams['payment_type'], [ 'GUARANTEED_INVOICE', 'INVOICE_START' ] ) ) {
@@ -441,7 +440,7 @@ class CallbackController extends Controller
 							// Checking for Invoice Guarantee
 							
 							$callbackComments = '</br>' . sprintf($this->paymentHelper->getTranslatedText('callback_order_confirmation_text',$orderLanguage), $this->aryCaptureParams['tid'], date('d.m.Y'), date('H:i:s'));               			    
-							if ($transaction_status == '75' && $this->aryCaptureParams['tid_status'] == '100') {
+							if ($transactionStatus == '75' && $this->aryCaptureParams['tid_status'] == '100') {
 								$orderStatus = $this->config->get('Novalnet.novalnet_invoice_callback_order_status'); 
 							}
 							$this->paymentHelper->updateOrderStatus($nnTransactionHistory->orderNo, (float) $orderStatus);
@@ -451,7 +450,7 @@ class CallbackController extends Controller
 							  
 								$callbackComments = '</br>' . sprintf($this->paymentHelper->getTranslatedText('callback_order_confirmation_text',$orderLanguage), $this->aryCaptureParams['tid'], date('d.m.Y'), date('H:i:s'));
 								$this->paymentHelper->createOrderComments($nnTransactionHistory->orderNo, $callbackComments);
-								if ($transaction_status == '75' && $this->aryCaptureParams['tid_status'] == '100') {
+								if ($transactionStatus == '75' && $this->aryCaptureParams['tid_status'] == '100') {
 									$orderStatus = $this->config->get('Novalnet.novalnet_sepa_order_completion_status'); 
 								}
 								$this->paymentHelper->updateOrderStatus($nnTransactionHistory->orderNo, (float)$orderStatus);

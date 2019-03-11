@@ -59,7 +59,7 @@ class NovalnetCashPaymentMethod extends PaymentMethodService
      */
     public function isActive():bool
     {
-        return (bool)(($this->configRepository->get('Novalnet.novalnet_cashpayment_payment_active')) && $this->paymentHelper->paymentActive());
+        return (bool)(($this->configRepository->get('Novalnet.novalnet_cashpayment_payment_active') == 'true') && $this->paymentHelper->paymentActive());
     }
 
     /**
@@ -68,7 +68,8 @@ class NovalnetCashPaymentMethod extends PaymentMethodService
      * @return string
      */
     public function getName():string
-    {   $name = trim($this->configRepository->get('Novalnet.novalnet_cashpayment_payment_name'));
+    {   
+		$name = trim($this->configRepository->get('Novalnet.novalnet_cashpayment_payment_name'));
         return ($name ? $name : $this->paymentHelper->getTranslatedText('novalnet_cashpayment'));
     }
 

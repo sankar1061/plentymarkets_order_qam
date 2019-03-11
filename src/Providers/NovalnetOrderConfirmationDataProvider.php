@@ -55,8 +55,8 @@ class NovalnetOrderConfirmationDataProvider
 				{
 					if ($payment->method['paymentKey'] == 'NOVALNET_CASHPAYMENT')
 					{
-						$barzhlentoken = html_entity_decode((string)$sessionStorage->getPlugin()->getValue('novalnet_checkout_token'));
-						$barzahlenurl = html_entity_decode((string)$sessionStorage->getPlugin()->getValue('novalnet_checkout_url'));
+						$barzhlentoken = html_entity_decode((string)$sessionStorage->getPlugin()->getValue('cashtoken'));
+						$barzahlenurl = html_entity_decode((string)$sessionStorage->getPlugin()->getValue('checkouturl'));
 					}
 					$orderId = (int) $payment->order['orderId'];
 					$authHelper = pluginApp(AuthHelper::class);

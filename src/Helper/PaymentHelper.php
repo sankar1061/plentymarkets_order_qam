@@ -30,7 +30,7 @@ use \Plenty\Modules\Authorization\Services\AuthHelper;
 use Plenty\Modules\Comment\Contracts\CommentRepositoryContract;
 use Plenty\Modules\Order\Shipping\Countries\Contracts\CountryRepositoryContract;
 use Plenty\Modules\Frontend\Session\Storage\Contracts\FrontendSessionStorageFactoryContract;
-use Novalnet\NovalnetConstants;
+use Novalnet\Constants\NovalnetConstants;
 
 /**
  * Class PaymentHelper
@@ -627,9 +627,9 @@ class PaymentHelper
 		
 	     $response = $this->executeCurl($paymentRequestData, NovalnetConstants::PAYPORT_URL);
 	     $responseData =$this->convertStringToArray($response['response'], '&');
-	
+	     if ($responseData['status'] == '100') {
 	     if($responseData['tid_status'] == '100') {
-			if (in_array($key, ['6', '34', '37'])) {
+			if (in_array($key, ['6', '34', '37', '40', '41'])) {
 	        $paymentData['currency']    = $paymentDetails[0]->currency;
 			$paymentData['paid_amount'] = (float) $order->amounts[0]->invoiceTotal;
 			$paymentData['tid']         = $tid;
@@ -644,43 +644,14 @@ class PaymentHelper
 	      }
 		    $this->createOrderComments((int)$order->id, $transactionComments);
 		    $this->updatePayments($tid, $responseData['tid_status'], $order->id);
-		  } catch (\Exception $e) {
+	     } else {
+	           $error = $this->getNovalnetStatusText($responseData);
+		   $this->getLogger(__METHOD__)->error('Novalnet::doCaptureVoid', $error);
+	     }
+	
+	} catch (\Exception $e) {
 			$this->getLogger(__METHOD__)->error('Novalnet::doCaptureVoid', $e);
 		  }
-	}
-	
-	/**
-	 * Execute Refund process
-	 *
-	 * @param int $orderId
-	 * @param int $tid
-	 * @param int $key
-	 * @param float $orderAmount
-	 * @return none
-	 */
-	public function doRefund($orderId, $tid, $key, $orderAmount) 
-	{
-	try {
-	$paymentRequestData = [
-	    'vendor'         => $this->getNovalnetConfig('novalnet_vendor_id'),
-	    'auth_code'      => $this->getNovalnetConfig('novalnet_auth_code'),
-	    'product'        => $this->getNovalnetConfig('novalnet_product_id'),
-	    'tariff'         => $this->getNovalnetConfig('novalnet_tariff_id'),
-	    'key'            => $key, 
-	    'refund_request' => 1, 
-	    'tid'            => $tid, 
-	     'refund_param'  => (float) $orderAmount * 100 ,
-	    'remote_ip'      => $this->getRemoteAddress(),
-	    'refund_ref'     => $orderId,
-	    'lang'           => 'EN'   
-	     ];
-		
-	     $response = $this->executeCurl($paymentRequestData, NovalnetConstants::PAYPORT_URL);
-	     $transactionComments = "refunded";
-	     $this->createOrderComments((int)$orderId, $transactionComments);
-		} catch (\Exception $e) {
-			$this->getLogger(__METHOD__)->error('Novalnet::doRefund', $e);
-		}
 	}
 	
 	/**
@@ -707,7 +678,6 @@ class PaymentHelper
 		$this->paymentRepository->updatePayment($payment);
 		}	   
     }
-	
 	public function dateFormatter($days) {
 		return date( 'Y-m-d', strtotime( date( 'y-m-d' ) . '+ ' . $days . ' days' ) );
 	}

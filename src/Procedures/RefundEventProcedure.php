@@ -20,6 +20,7 @@ use Plenty\Plugin\Log\Loggable;
 use Novalnet\Helper\PaymentHelper;
 use Plenty\Modules\Payment\Contracts\PaymentRepositoryContract;
 use Novalnet\Services\PaymentService;
+use Novalnet\Constants\NovalnetConstants;
 
 /**
  * Class RefundEventProcedure
@@ -90,16 +91,41 @@ class RefundEventProcedure
         
 	    if ($status == '100' && ($order->amounts[0]->paidAmount) == $orderAmount)   
 	    { 
-        $this->paymentHelper->doRefund($order->id, $tid, $key, $orderAmount); 
-        
-	    $paymentData['currency']    = $paymentDetails[0]->currency;
-		$paymentData['paid_amount'] = (float) $orderAmount;
-		$paymentData['tid']         = $tid;
-		$paymentData['order_no']    = $order->id;
-	    $paymentData['type']        = 'debit';
-		$paymentData['mop']         = $paymentDetails[0]->mopId;
-		
-	    $this->paymentHelper->createPlentyPayment($paymentData);
+			try {
+				$paymentRequestData = [
+					'vendor'         => $this->paymentHelper->getNovalnetConfig('novalnet_vendor_id'),
+					'auth_code'      => $this->paymentHelper->getNovalnetConfig('novalnet_auth_code'),
+					'product'        => $this->paymentHelper->getNovalnetConfig('novalnet_product_id'),
+					'tariff'         => $this->paymentHelper->getNovalnetConfig('novalnet_tariff_id'),
+					'key'            => $key, 
+					'refund_request' => 1, 
+					'tid'            => $tid, 
+					 'refund_param'  => (float) $orderAmount * 100 ,
+					'remote_ip'      => $this->paymentHelper->getRemoteAddress(),
+					'lang'           => 'EN'   
+					 ];
+					
+					 $response = $this->paymentHelper->executeCurl($paymentRequestData, NovalnetConstants::PAYPORT_URL);
+					  $responseData =$this->paymentHelper->convertStringToArray($response['response'], '&');	 
+				if ($responseData['status'] == '100') {
+					 $transactionComments = PHP_EOL . sprintf($this->paymentHelper->getTranslatedText('refund_message', $paymentRequestData['lang']), $tid, (float) $orderAmount * 100);
+					 $this->paymentHelper->createOrderComments((int)$order->id, $transactionComments);
+					} else {
+					$error = $this->paymentHelper->getNovalnetStatusText($responseData);
+					$this->getLogger(__METHOD__)->error('Novalnet::doRefundError', $error);
+				}
+				} catch (\Exception $e) {
+						$this->getLogger(__METHOD__)->error('Novalnet::doRefund', $e);
+					}
+				
+				$paymentData['currency']    = $paymentDetails[0]->currency;
+				$paymentData['paid_amount'] = (float) $orderAmount;
+				$paymentData['tid']         = $tid;
+				$paymentData['order_no']    = $order->id;
+				$paymentData['type']        = 'debit';
+				$paymentData['mop']         = $paymentDetails[0]->mopId;
+				
+				$this->paymentHelper->createPlentyPayment($paymentData);
 	    }
     }
 }

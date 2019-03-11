@@ -59,7 +59,7 @@ class NovalnetPaypalPaymentMethod extends PaymentMethodService
      */
     public function isActive():bool
     {
-        return (bool)(($this->configRepository->get('Novalnet.novalnet_paypal_payment_active')) && $this->paymentHelper->paymentActive());
+        return (bool)(($this->configRepository->get('Novalnet.novalnet_paypal_payment_active') == 'true') && $this->paymentHelper->paymentActive());
     }
 
     /**

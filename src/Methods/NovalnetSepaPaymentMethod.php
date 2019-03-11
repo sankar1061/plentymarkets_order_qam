@@ -59,7 +59,7 @@ class NovalnetSepaPaymentMethod extends PaymentMethodService
      */
     public function isActive():bool
     {
-        return (bool)(($this->configRepository->get('Novalnet.novalnet_sepa_payment_active')) && $this->paymentHelper->paymentActive());
+        return (bool)(($this->configRepository->get('Novalnet.novalnet_sepa_payment_active') == 'true') && $this->paymentHelper->paymentActive());
     }
 
     /**
