@@ -173,7 +173,7 @@ class PaymentService
 					$requestData['paid_amount'] = 0;
 				} else {
 					$requestData['order_status'] = trim($this->config->get('Novalnet.'. $requestData['payment_method'] .'_order_completion_status'));
-					$requestData['paid_amount'] = $requestData['amount'];
+					$requestData['paid_amount'] = ($requestData['tid_status'] == 100 ) ? $requestData['amount'] : 0;
 				}
             } else {
                 $requestData['order_status'] = trim($this->config->get('Novalnet.novalnet_order_cancel_status'));
