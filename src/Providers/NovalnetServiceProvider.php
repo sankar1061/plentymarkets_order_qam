@@ -207,9 +207,7 @@ class NovalnetServiceProvider extends ServiceProvider
                     {		
 						$paymentKey = $paymentHelper->getPaymentKeyByMop($event->getMop());	
 						$guaranteeStatus = $paymentService->getGuaranteeStatus($basketRepository->load(), $paymentKey);
-						$basket = $basketRepository->load();			
-				$billingAddressId = $basket->customerInvoiceAddressId;
-        			$address = $addressRepository->findAddressById($billingAddressId);		
+	
 			    $redirect = $paymentService->isRedirectPayment($paymentKey);		
 						if ($redirect && $paymentKey != 'NOVALNET_CC') { # Redirection payments
 							$serverRequestData = $paymentService->getRequestParameters($basketRepository->load(), $paymentKey);
@@ -229,6 +227,9 @@ class NovalnetServiceProvider extends ServiceProvider
                             $contentType = 'htmlContent';
 						} elseif($paymentKey == 'NOVALNET_SEPA') {
                                 $paymentProcessUrl = $paymentService->getProcessPaymentUrl();
+				$basket = $basketRepository->load();			
+				$billingAddressId = $basket->customerInvoiceAddressId;
+        			$address = $addressRepository->findAddressById($billingAddressId);
                                 $contentType = 'htmlContent';
                                 $guaranteeStatus = $paymentService->getGuaranteeStatus($basketRepository->load(), $paymentKey);
 
@@ -243,7 +244,7 @@ class NovalnetServiceProvider extends ServiceProvider
                                                                     'nnPaymentProcessUrl' => $paymentProcessUrl,
                                                                     'paymentMopKey'     =>  $paymentKey,
 								    'endcustomername'=> $address->firstName .' '. $address->lastName,
-                                                                    'nnGuaranteeStatus' =>  empty($address->companyName) ? $guaranteeStatus : ''
+                                                                    'nnGuaranteeStatus' =>  $guaranteeStatus
                                                  ]);
                                 }
                             } else {
@@ -267,7 +268,7 @@ class NovalnetServiceProvider extends ServiceProvider
 											$content = $twig->render('Novalnet::PaymentForm.NOVALNET_INVOICE', [
 																'nnPaymentProcessUrl' => $paymentProcessUrl,
 																'paymentMopKey'     =>  $paymentKey,
-																'nnGuaranteeStatus' =>  empty($address->companyName) ? $guaranteeStatus : ''
+																'nnGuaranteeStatus' =>  $guaranteeStatus
 											]);
 											$contentType = 'htmlContent';
 										 }
