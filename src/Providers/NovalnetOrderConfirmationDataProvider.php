@@ -31,50 +31,53 @@ use Plenty\Modules\Frontend\Session\Storage\Contracts\FrontendSessionStorageFact
  */
 class NovalnetOrderConfirmationDataProvider
 {
-    /**
-     * Setup the Novalnet transaction comments for the requested order
-     *
-     * @param Twig $twig
-     * @param Arguments $arg
-     * @param PaymentRepositoryContract $paymentRepositoryContract
-     * @return string
-     */
-    public function call(Twig $twig, PaymentRepositoryContract $paymentRepositoryContract, $arg)
-    {
-        $paymentHelper = pluginApp(PaymentHelper::class);
-        $sessionStorage = pluginApp(FrontendSessionStorageFactoryContract::class);
+	/**
+	 * Setup the Novalnet transaction comments for the requested order
+	 *
+	 * @param Twig $twig
+	 * @param PaymentRepositoryContract $paymentRepositoryContract
+	 * @param Arguments $arg
+	 * @return string
+	 */
+	public function call(Twig $twig, PaymentRepositoryContract $paymentRepositoryContract, $arg)
+	{
+		$paymentHelper = pluginApp(PaymentHelper::class);
+		$sessionStorage = pluginApp(FrontendSessionStorageFactoryContract::class);
+		$order = $arg[0];
+		$barzhlentoken = '';
+		$barzahlenurl = '';
+		$payments = $paymentRepositoryContract->getPaymentsByOrderId($order['id']);
+		
+		if (!empty ($order['id'])) {
+			foreach($payments as $payment)
+			{
+				if($paymentHelper->getPaymentKeyByMop($payment->mopId))
+				{
+					if ($payment->method['paymentKey'] == 'NOVALNET_CASHPAYMENT')
+					{
+						$barzhlentoken = html_entity_decode((string)$sessionStorage->getPlugin()->getValue('novalnet_checkout_token'));
+						$barzahlenurl = html_entity_decode((string)$sessionStorage->getPlugin()->getValue('novalnet_checkout_url'));
+					}
+					$orderId = (int) $payment->order['orderId'];
+					$authHelper = pluginApp(AuthHelper::class);
+					$orderComments = $authHelper->processUnguarded(
+							function () use ($orderId) {
+								$commentsObj = pluginApp(CommentRepositoryContract::class);
+								$commentsObj->setFilters(['referenceType' => 'order', 'referenceValue' => $orderId]);
+								return $commentsObj->listComments();
+							}
+					);
+					$comment = '';
+					foreach($orderComments as $data)
+					{
+						$comment .= (string)$data->text;
+						$comment .= PHP_EOL;
+					}
 
-        $order = $arg[0];
-
-        $barzahlentoken =   (string)$sessionStorage->getPlugin()->getValue('cashtoken');
-        $testmode       =   (string)$sessionStorage->getPlugin()->getValue('testmode');
-        $payments       =   $paymentRepositoryContract->getPaymentsByOrderId($order['id']);
-
-        foreach($payments as $payment)
-        {
-            if($paymentHelper->getPaymentKeyByMop($payment->mopId))
-            {
-                $orderId = (int) $payment->order['orderId'];
-
-                $authHelper = pluginApp(AuthHelper::class);
-                $orderComments = $authHelper->processUnguarded(
-                        function () use ($orderId) {
-                            $commentsObj = pluginApp(CommentRepositoryContract::class);
-                            $commentsObj->setFilters(['referenceType' => 'order', 'referenceValue' => $orderId]);
-                            return $commentsObj->listComments();
-                        }
-                );
-                $comment = '';
-                foreach($orderComments as $data)
-                {
-                    $comment .= (string)$data->text;
-                    $comment .= '</br>';
-                }
-
-              $payment_type = (string)$paymentHelper->getPaymentKeyByMop($payment->mopId);
-
-                return $twig->render('Novalnet::NovalnetOrderHistory', ['comments' => html_entity_decode($comment),'barzahlentoken' => html_entity_decode($barzahlentoken),'payment_type' => html_entity_decode($payment_type),'testmode' => html_entity_decode($testmode)]);
-            }
-        }
-    }
+				  $payment_type = (string)$paymentHelper->getPaymentKeyByMop($payment->mopId);
+				  return $twig->render('Novalnet::NovalnetOrderHistory', ['comments' => html_entity_decode($comment),'barzahlentoken' => $barzhlentoken,'payment_type' => html_entity_decode($payment_type),'barzahlenurl' => $barzahlenurl]);
+				}
+			}
+		}
+	}
 }

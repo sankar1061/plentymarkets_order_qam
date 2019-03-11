@@ -19,7 +19,7 @@ Zur Einrichtung rufen Sie den Menüpunkt **Plugins -> Plugin-Übersicht -> Noval
 ### Novalnet Haupteinstellungen
 
 - Geben Sie Ihre Novalnet Login Daten ein, um die Zahlungsmethode in Ihrem Shop sichtbar zu machen.
-- Die Eingabefelder **Aktivierungsschlüssel**, **Merchant ID**, **Authentication code**, **Project ID**, **Tariff ID** und **Payment access key** sind Pflichtfelder.
+- Die Eingabefelder **Merchant ID**, **Authentication code**, **Project ID**, **Tariff ID** und **Payment access key** sind Pflichtfelder.
 - Diese Daten sind im [Novalnet Händler Administrationsportal ersichtlich](https://admin.novalnet.de/).
 - Um die Einrichtung von Novalnet in Ihrem Shop abzuschließen, bestätigen Sie bitte nach der Eingabe der Daten in den jeweiligen Feldern den Menüpunkt **Enable payment method**.
 
@@ -84,12 +84,6 @@ Zur Einrichtung rufen Sie den Menüpunkt **Plugins -> Plugin-Übersicht -> Noval
         </tr>
         <tr>
             <td>
-                <b>Set a limit for on-hold transaction</b> (in minimum unit of currency. E.g. enter 100 which is equal to 1.00)
-            </td>
-            <td>Falls eine Bestellung die angegebene Grenze überschreitet, wird diese Bestellung bis zur manuellen Bestätigung des Händlers auf den Status <b>on-hold</b> gesetzt.</td>
-        </tr>
-        <tr>
-            <td>
                 <b>Referrer ID</b>
             </td>
             <td>Geben Sie die Partner-ID der Person / des Unternehmens ein, welche / welches Ihnen Novalnet empfohlen hat</td>
@@ -111,9 +105,9 @@ Zur Einrichtung rufen Sie den Menüpunkt **Plugins -> Plugin-Übersicht -> Noval
         </tr>
         <tr>
             <td>
-                <b>SEPA payment duration (in days)</b>
+                <b>Set a limit for on-hold transaction</b> (in minimum unit of currency. E.g. enter 100 which is equal to 1.00)
             </td>
-            <td>Geben Sie die Anzahl der Tage ein, nach denen die Zahlung verarbeitet werden soll (muss größer als 6 Tage sein).</td>
+            <td>Falls eine Bestellung die angegebene Grenze überschreitet, wird diese Bestellung bis zur manuellen Bestätigung des Händlers auf den Status <b>on-hold</b> gesetzt.</td>
         </tr>
         <td class="th" align=CENTER colspan="2">Kauf auf Rechnung / Vorauskasse</td>
         <tr>
@@ -122,12 +116,25 @@ Zur Einrichtung rufen Sie den Menüpunkt **Plugins -> Plugin-Übersicht -> Noval
             </td>
             <td>Geben Sie die Anzahl der Tage ein, binnen derer die Zahlung bei Novalnet eingehen soll (muss größer als 7 Tage sein). Falls dieses Feld leer ist, werden 14 Tage als Standard-Zahlungsfrist gesetzt.</td>
         </tr>
+        <tr>
+            <td>
+                <b>Set a limit for on-hold transaction</b> (in minimum unit of currency. E.g. enter 100 which is equal to 1.00)
+            </td>
+            <td>Falls eine Bestellung die angegebene Grenze überschreitet, wird diese Bestellung bis zur manuellen Bestätigung des Händlers auf den Status <b>on-hold</b> gesetzt.</td>
+        </tr>
         <td class="th" align=CENTER colspan="2">Barzahlen</td>
         <tr>
             <td>
                 <b>Slip expiry date (in days)</b>
             </td>
             <td>Geben Sie die Anzahl der Tage ein, um den Betrag in einer Barzahlen-Partnerfiliale in Ihrer Nähe zu bezahlen. Wenn das Feld leer ist, werden standardmäßig 14 Tage als Fälligkeitsdatum gesetzt.</td>
+        </tr>
+        <td class="th" align=CENTER colspan="2">Paypal</td>
+        <tr>
+            <td>
+                <b>Set a limit for on-hold transaction</b> (in minimum unit of currency. E.g. enter 100 which is equal to 1.00)
+            </td>
+            <td>Falls eine Bestellung die angegebene Grenze überschreitet, wird diese Bestellung bis zur manuellen Bestätigung des Händlers auf den Status <b>on-hold</b> gesetzt.</td>
         </tr>
     </tbody>
 </table>
@@ -136,12 +143,12 @@ Zur Einrichtung rufen Sie den Menüpunkt **Plugins -> Plugin-Übersicht -> Noval
 
 Um die Transaktionsdetails anzeigen zu lassen, befolgen Sie bitte die folgenden Schritte.
 
-1. Navigieren Sie zum Menüpunkt **Plugins » Content**.
+1. Navigieren Sie zum Menüpunkt **CMS » Container-Verknüpfungen**.
 2. Navigieren Sie zum Bereich **Novalnet payment details**.
 3. Aktivieren Sie das Feld **Order confirmation: Additional payment information**.
 4. Drücken Sie auf **Speichern**.<br />→ Die Zahlungsdetails werden danach auf der Bestellbestätigungsseite angezeigt.
 
-## Update of Vendor Script URL
+## Aktualisierung der Händlerskript-URL
 
 Die Händlerskript-URL wird dazu benötigt, um den Transaktionsstatus in der Datenbank / im System des Händlers aktuell und auf demselben Stand wie bei Novalnet zu halten. Dazu muss die Händlerskript-URL im [Novalnet-Händleradministrationsportal](https://admin.novalnet.de/) eingerichtet werden.
 

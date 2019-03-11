@@ -4,15 +4,6 @@
       "Config.NovalnetGlobalConfigurationTab":{  
          "label":"Config.NovalnetGlobalConfigurationTab",
          "formFields":{  
-            "novalnet_activation_key":{  
-               "type":"inputText",
-               "required":false,
-               "label":"Config.activationKeyLabel",
-               "options":{  
-                  "tooltip":"Config.activationKeyTooltip",
-                  "defaultValue":""
-               }
-            },
             "novalnet_vendor_id":{  
                "type":"inputText",
                "required":false,
@@ -76,6 +67,14 @@
                   "defaultValue":""
                }
             },
+            "novalnet_order_completion_status":{  
+               "type":"inputText",
+               "required":false,
+               "label":"Config.orderCompletionStatusLabel",
+               "options":{  
+                  "defaultValue":"7.1"
+               }
+            },
             "novalnet_order_cancel_status":{  
                "type":"inputText",
                "required":false,
@@ -136,21 +135,42 @@
          "label":"Config.NovalnetCreditCardTab",
          "formFields":{  
             "novalnet_cc_payment_active":{  
-               "type":"checkBox",
+               "type":"selectBox",
                "required":false,
                "label":"Config.paymentActiveLabel",
                "options":{  
                   "tooltip":"Config.ccPaymentActiveTooltip",
-                  "defaultValue":false
+                  "defaultValue":"0",
+		  "selectBoxValues": [
+              {
+                "value": "1",
+                "caption": "Config.NovalnetEnableConfiguration"
+              },
+              {
+                "value": "0",
+                "caption": "Config.NovalnetDisableConfiguration"
+              }
+            ]
                }
             },
             "novalnet_cc_test_mode":{  
-               "type":"checkBox",
+               "type":"selectBox",
                "required":false,
                "label":"Config.testModeLabel",
                "options":{  
                   "tooltip":"Config.novalnetCcTestModeTooltip",
-                  "defaultValue":false
+                  "defaultValue":"0",
+		       "selectBoxValues": [
+              {
+                "value": "1",
+                "caption": "Config.NovalnetEnableConfiguration"
+              },
+              {
+                "value": "0",
+                "caption": "Config.NovalnetDisableConfiguration"
+              }
+            ]
+		
                }
             },
             "novalnet_cc_payment_name":{  
@@ -167,6 +187,14 @@
                "label":"Config.paymentDescriptionLabel",
                "options":{  
                   "defaultValue":""
+               }
+            },
+            "novalnet_cc_payment_logo":{  
+               "type":"inputFile",
+               "required":false,
+               "label":"Config.paymentLogoLabel",
+               "options":{  
+                  "defaultValue":"images/cc.png"
                }
             },
             "novalnet_cc_3d":{  
@@ -202,88 +230,6 @@
                   "defaultValue":"7.1"
                }
             },
-            "novalnet_cc_reference1":{  
-               "type":"inputText",
-               "required":false,
-               "label":"Config.reference1Label",
-               "options":{  
-                  "tooltip":"Config.novalnetReferenceTooltip",
-                  "defaultValue":""
-               }
-            },
-            "novalnet_cc_reference2":{  
-               "type":"inputText",
-               "required":false,
-               "label":"Config.reference2Label",
-               "options":{  
-                  "tooltip":"Config.novalnetReferenceTooltip",
-                  "defaultValue":""
-               }
-            },
-            "novalnet_cc_holder_label_css":{  
-               "type":"inputText",
-               "required":false,
-               "label":"Config.novalnetCcHolderLabelCssLabel",
-               "options":{  
-                  "defaultValue":""
-               }
-            },
-            "novalnet_cc_holder_field_css":{  
-               "type":"inputText",
-               "required":false,
-               "label":"Config.novalnetCcHolderFieldCssLabel",
-               "options":{  
-                  "defaultValue":""
-               }
-            },
-            "novalnet_cc_number_label_css":{  
-               "type":"inputText",
-               "required":false,
-               "label":"Config.novalnetCcNumberLabelCssLabel",
-               "options":{  
-                  "defaultValue":""
-               }
-            },
-            "novalnet_cc_number_field_css":{  
-               "type":"inputText",
-               "required":false,
-               "label":"Config.novalnetCcNumberFieldCssLabel",
-               "options":{  
-                  "defaultValue":""
-               }
-            },
-            "novalnet_cc_date_label_css":{  
-               "type":"inputText",
-               "required":false,
-               "label":"Config.novalnetCcDateLabelCssLabel",
-               "options":{  
-                  "defaultValue":""
-               }
-            },
-            "novalnet_cc_date_field_css":{  
-               "type":"inputText",
-               "required":false,
-               "label":"Config.novalnetCcDateFieldCssLabel",
-               "options":{  
-                  "defaultValue":""
-               }
-            },
-            "novalnet_cc_cvc_label_css":{  
-               "type":"inputText",
-               "required":false,
-               "label":"Config.novalnetCcCvcLabelCssLabel",
-               "options":{  
-                  "defaultValue":""
-               }
-            },
-            "novalnet_cc_cvc_field_css":{  
-               "type":"inputText",
-               "required":false,
-               "label":"Config.novalnetCcCvcFieldCssLabel",
-               "options":{  
-                  "defaultValue":""
-               }
-            },
             "novalnet_cc_standard_style_label":{  
                "type":"inputText",
                "required":false,
@@ -314,19 +260,40 @@
          "label":"Config.NovalnetDirectDebitSEPATab",
          "formFields":{  
             "novalnet_sepa_payment_active":{  
-               "type":"checkBox",
+               "type":"selectBox",
                "required":false,
                "label":"Config.paymentActiveLabel",
                "options":{  
-                  "defaultValue":false
+                  "defaultValue":"0",
+		  "selectBoxValues": [
+              {
+                "value": "1",
+                "caption": "Config.NovalnetEnableConfiguration"
+              },
+              {
+                "value": "0",
+                "caption": "Config.NovalnetDisableConfiguration"
+              }
+            ]
                }
             },
             "novalnet_sepa_test_mode":{  
-               "type":"checkBox",
+               "type":"selectBox",
                "required":false,
                "label":"Config.testModeLabel",
                "options":{  
-                  "defaultValue":false
+                  "defaultValue":"0",
+		       "selectBoxValues": [
+              {
+                "value": "1",
+                "caption": "Config.NovalnetEnableConfiguration"
+              },
+              {
+                "value": "0",
+                "caption": "Config.NovalnetDisableConfiguration"
+              }
+            ]
+		
                }
             },
             "novalnet_sepa_payment_name":{  
@@ -343,6 +310,23 @@
                "label":"Config.paymentDescriptionLabel",
                "options":{  
                   "defaultValue":""
+               }
+            },
+            "novalnet_sepa_due_date": {
+                    "type": "inputText",
+                    "required": false,
+                    "label": "Config.sepaDueDateLabel",
+                    "options": {
+						"tooltip": "Config.sepaDueDateTooltip",
+						"defaultValue": ""
+						}
+            },
+            "novalnet_sepa_payment_logo":{  
+               "type":"inputFile",
+               "required":false,
+               "label":"Config.paymentLogoLabel",
+               "options":{  
+                  "defaultValue":"images/sepa.png"
                }
             },
             "novalnet_sepa_on_hold":{  
@@ -362,24 +346,6 @@
                   "defaultValue":"7.1"
                }
             },
-            "novalnet_sepa_reference1":{  
-               "type":"inputText",
-               "required":false,
-               "label":"Config.reference1Label",
-               "options":{  
-                  "tooltip":"Config.novalnetReferenceTooltip",
-                  "defaultValue":""
-               }
-            },
-            "novalnet_sepa_reference2":{  
-               "type":"inputText",
-               "required":false,
-               "label":"Config.reference2Label",
-               "options":{  
-                  "tooltip":"Config.novalnetReferenceTooltip",
-                  "defaultValue":""
-               }
-            },
             "novalnet_sepa_payment_guarantee_active":{  
                "type":"checkBox",
                "required":false,
@@ -394,7 +360,15 @@
                "label":"Config.guaranteeMinAmountLabel",
                "options":{  
                   "tooltip":"Config.guaranteeMinAmountTooltip",
-                  "defaultValue":"999"
+                  "defaultValue":""
+               }
+            },
+            "novalnet_sepa_payment_guarantee_status":{  
+               "type":"inputText",
+               "required":false,
+               "label":"Config.paymentGuaranteeStatus",
+               "options":{  
+                  "defaultValue":"3"
                }
             },
             "novalnet_sepa_payment_guarantee_force_active":{  
@@ -411,19 +385,40 @@
          "label":"Config.NovalnetInvoiceTab",
          "formFields":{  
             "novalnet_invoice_payment_active":{  
-               "type":"checkBox",
+               "type":"selectBox",
                "required":false,
                "label":"Config.paymentActiveLabel",
                "options":{  
-                  "defaultValue":false
+                  "defaultValue":"0",
+		  "selectBoxValues": [
+              {
+                "value": "1",
+                "caption": "Config.NovalnetEnableConfiguration"
+              },
+              {
+                "value": "0",
+                "caption": "Config.NovalnetDisableConfiguration"
+              }
+            ]
                }
             },
             "novalnet_invoice_test_mode":{  
-               "type":"checkBox",
+               "type":"selectBox",
                "required":false,
                "label":"Config.testModeLabel",
                "options":{  
-                  "defaultValue":false
+                  "defaultValue":"0",
+		       "selectBoxValues": [
+              {
+                "value": "1",
+                "caption": "Config.NovalnetEnableConfiguration"
+              },
+              {
+                "value": "0",
+                "caption": "Config.NovalnetDisableConfiguration"
+              }
+            ]
+		
                }
             },
             "novalnet_invoice_payment_name":{  
@@ -440,6 +435,14 @@
                "label":"Config.paymentDescriptionLabel",
                "options":{  
                   "defaultValue":""
+               }
+            },
+            "novalnet_invoice_payment_logo":{  
+               "type":"inputFile",
+               "required":false,
+               "label":"Config.paymentLogoLabel",
+               "options":{  
+                  "defaultValue":"images/invoice.png"
                }
             },
             "novalnet_invoice_due_date":{  
@@ -460,7 +463,7 @@
                   "defaultValue":""
                }
             },
-            "novalnet_invoiceorder_completion_status":{  
+            "novalnet_invoice_order_completion_status":{  
                "type":"inputText",
                "required":false,
                "label":"Config.orderCompletionStatusLabel",
@@ -474,24 +477,6 @@
                "label":"Config.callbackOrderStatusLabel",
                "options":{  
                   "defaultValue":"9.5"
-               }
-            },
-            "novalnet_invoice_reference1":{  
-               "type":"inputText",
-               "required":false,
-               "label":"Config.reference1Label",
-               "options":{  
-                  "tooltip":"Config.novalnetReferenceTooltip",
-                  "defaultValue":""
-               }
-            },
-            "novalnet_invoice_reference2":{  
-               "type":"inputText",
-               "required":false,
-               "label":"Config.reference2Label",
-               "options":{  
-                  "tooltip":"Config.novalnetReferenceTooltip",
-                  "defaultValue":""
                }
             },
             "novalnet_invoice_payment_guarantee_active":{  
@@ -508,7 +493,15 @@
                "label":"Config.guaranteeMinAmountLabel",
                "options":{  
                   "tooltip":"Config.guaranteeMinAmountTooltip",
-                  "defaultValue":"999"
+                  "defaultValue":""
+               }
+            },
+            "novalnet_invoice_payment_guarantee_status":{  
+               "type":"inputText",
+               "required":false,
+               "label":"Config.paymentGuaranteeStatus",
+               "options":{  
+                  "defaultValue":"3"
                }
             },
             "novalnet_invoice_payment_guarantee_force_active":{  
@@ -525,19 +518,40 @@
          "label":"Config.NovalnetPrepaymentTab",
          "formFields":{  
             "novalnet_prepayment_payment_active":{  
-               "type":"checkBox",
+               "type":"selectBox",
                "required":false,
                "label":"Config.paymentActiveLabel",
                "options":{  
-                  "defaultValue":false
+                  "defaultValue":"0",
+		  "selectBoxValues": [
+              {
+                "value": "1",
+                "caption": "Config.NovalnetEnableConfiguration"
+              },
+              {
+                "value": "0",
+                "caption": "Config.NovalnetDisableConfiguration"
+              }
+            ]
                }
             },
             "novalnet_prepayment_test_mode":{  
-               "type":"checkBox",
+               "type":"selectBox",
                "required":false,
                "label":"Config.testModeLabel",
                "options":{  
-                  "defaultValue":false
+                  "defaultValue":"0",
+		       "selectBoxValues": [
+              {
+                "value": "1",
+                "caption": "Config.NovalnetEnableConfiguration"
+              },
+              {
+                "value": "0",
+                "caption": "Config.NovalnetDisableConfiguration"
+              }
+            ]
+		
                }
             },
             "novalnet_prepayment_payment_name":{  
@@ -556,6 +570,14 @@
                   "defaultValue":""
                }
             },
+            "novalnet_prepayment_payment_logo":{  
+               "type":"inputFile",
+               "required":false,
+               "label":"Config.paymentLogoLabel",
+               "options":{  
+                  "defaultValue":"images/prepayment.png"
+               }
+            },
             "novalnet_prepayment_order_completion_status":{  
                "type":"inputText",
                "required":false,
@@ -567,27 +589,9 @@
             "novalnet_prepayment_callback_order_status":{  
                "type":"inputText",
                "required":false,
-               "label":"Config.prepaymentCallbackOrderStatusLabel",
+               "label":"Config.callbackOrderStatusLabel",
                "options":{  
                   "defaultValue":"9.5"
-               }
-            },
-            "novalnet_prepayment_reference1":{  
-               "type":"inputText",
-               "required":false,
-               "label":"Config.reference1Label",
-               "options":{  
-                  "tooltip":"Config.novalnetReferenceTooltip",
-                  "defaultValue":""
-               }
-            },
-            "novalnet_prepayment_reference2":{  
-               "type":"inputText",
-               "required":false,
-               "label":"Config.reference2Label",
-               "options":{  
-                  "tooltip":"Config.novalnetReferenceTooltip",
-                  "defaultValue":""
                }
             }
          }
@@ -596,19 +600,40 @@
          "label":"Config.NovalnetBarzahlenTab",
          "formFields":{  
             "novalnet_cashpayment_payment_active":{  
-               "type":"checkBox",
+               "type":"selectBox",
                "required":false,
                "label":"Config.paymentActiveLabel",
                "options":{  
-                  "defaultValue":false
+                  "defaultValue":"0",
+		  "selectBoxValues": [
+              {
+                "value": "1",
+                "caption": "Config.NovalnetEnableConfiguration"
+              },
+              {
+                "value": "0",
+                "caption": "Config.NovalnetDisableConfiguration"
+              }
+            ]
                }
             },
             "novalnet_cashpayment_test_mode":{  
-               "type":"checkBox",
+               "type":"selectBox",
                "required":false,
                "label":"Config.testModeLabel",
                "options":{  
-                  "defaultValue":false
+                  "defaultValue":"0",
+		       "selectBoxValues": [
+              {
+                "value": "1",
+                "caption": "Config.NovalnetEnableConfiguration"
+              },
+              {
+                "value": "0",
+                "caption": "Config.NovalnetDisableConfiguration"
+              }
+            ]
+		
                }
             },
             "novalnet_cashpayment_payment_name":{  
@@ -625,6 +650,14 @@
                "label":"Config.paymentDescriptionLabel",
                "options":{  
                   "defaultValue":""
+               }
+            },
+            "novalnet_cashpayment_payment_logo":{  
+               "type":"inputFile",
+               "required":false,
+               "label":"Config.paymentLogoLabel",
+               "options":{  
+                  "defaultValue":"images/barzahlen.png"
                }
             },
             "novalnet_cashpayment_due_date":{  
@@ -651,24 +684,6 @@
                "options":{  
                   "defaultValue":"9.5"
                }
-            },
-            "novalnet_cashpayment_reference1":{  
-               "type":"inputText",
-               "required":false,
-               "label":"Config.reference1Label",
-               "options":{  
-                  "tooltip":"Config.novalnetReferenceTooltip",
-                  "defaultValue":""
-               }
-            },
-            "novalnet_cashpayment_reference2":{  
-               "type":"inputText",
-               "required":false,
-               "label":"Config.reference2Label",
-               "options":{  
-                  "tooltip":"Config.novalnetReferenceTooltip",
-                  "defaultValue":""
-               }
             }
          }
       },
@@ -676,19 +691,40 @@
          "label":"Config.NovalnetInstantBankTransferTab",
          "formFields":{  
             "novalnet_sofort_payment_active":{  
-               "type":"checkBox",
+               "type":"selectBox",
                "required":false,
                "label":"Config.paymentActiveLabel",
                "options":{  
-                  "defaultValue":false
+                  "defaultValue":"0",
+		  "selectBoxValues": [
+              {
+                "value": "1",
+                "caption": "Config.NovalnetEnableConfiguration"
+              },
+              {
+                "value": "0",
+                "caption": "Config.NovalnetDisableConfiguration"
+              }
+            ]
                }
             },
             "novalnet_sofort_test_mode":{  
-               "type":"checkBox",
+               "type":"selectBox",
                "required":false,
                "label":"Config.testModeLabel",
                "options":{  
-                  "defaultValue":false
+                  "defaultValue":"0",
+		       "selectBoxValues": [
+              {
+                "value": "1",
+                "caption": "Config.NovalnetEnableConfiguration"
+              },
+              {
+                "value": "0",
+                "caption": "Config.NovalnetDisableConfiguration"
+              }
+            ]
+		
                }
             },
             "novalnet_sofort_payment_name":{  
@@ -707,30 +743,20 @@
                   "defaultValue":""
                }
             },
+            "novalnet_sofort_payment_logo":{  
+               "type":"inputFile",
+               "required":false,
+               "label":"Config.paymentLogoLabel",
+               "options":{  
+                  "defaultValue":"images/banktransfer.png"
+               }
+            },
             "novalnet_sofort_order_completion_status":{  
                "type":"inputText",
                "required":false,
                "label":"Config.orderCompletionStatusLabel",
                "options":{  
                   "defaultValue":"7.1"
-               }
-            },
-            "novalnet_sofort_reference1":{  
-               "type":"inputText",
-               "required":false,
-               "label":"Config.reference1Label",
-               "options":{  
-                  "tooltip":"Config.novalnetReferenceTooltip",
-                  "defaultValue":""
-               }
-            },
-            "novalnet_sofort_reference2":{  
-               "type":"inputText",
-               "required":false,
-               "label":"Config.reference2Label",
-               "options":{  
-                  "tooltip":"Config.novalnetReferenceTooltip",
-                  "defaultValue":""
                }
             }
          }
@@ -739,19 +765,40 @@
          "label":"Config.NovalnetPayPalTab",
          "formFields":{  
             "novalnet_paypal_payment_active":{  
-               "type":"checkBox",
+               "type":"selectBox",
                "required":false,
                "label":"Config.paymentActiveLabel",
                "options":{  
-                  "defaultValue":false
+                  "defaultValue":"0",
+		  "selectBoxValues": [
+              {
+                "value": "1",
+                "caption": "Config.NovalnetEnableConfiguration"
+              },
+              {
+                "value": "0",
+                "caption": "Config.NovalnetDisableConfiguration"
+              }
+            ]
                }
             },
             "novalnet_paypal_test_mode":{  
-               "type":"checkBox",
+               "type":"selectBox",
                "required":false,
                "label":"Config.testModeLabel",
                "options":{  
-                  "defaultValue":false
+                  "defaultValue":"0",
+		       "selectBoxValues": [
+              {
+                "value": "1",
+                "caption": "Config.NovalnetEnableConfiguration"
+              },
+              {
+                "value": "0",
+                "caption": "Config.NovalnetDisableConfiguration"
+              }
+            ]
+		
                }
             },
             "novalnet_paypal_payment_name":{  
@@ -768,6 +815,14 @@
                "label":"Config.paymentDescriptionLabel",
                "options":{  
                   "defaultValue":""
+               }
+            },
+            "novalnet_paypal_payment_logo":{  
+               "type":"inputFile",
+               "required":false,
+               "label":"Config.paymentLogoLabel",
+               "options":{  
+                  "defaultValue":"images/paypal.png"
                }
             },
             "novalnet_paypal_on_hold":{  
@@ -794,24 +849,6 @@
                "options":{  
                   "defaultValue":"7.1"
                }
-            },
-            "novalnet_paypal_reference1":{  
-               "type":"inputText",
-               "required":false,
-               "label":"Config.reference1Label",
-               "options":{  
-                  "tooltip":"Config.novalnetReferenceTooltip",
-                  "defaultValue":""
-               }
-            },
-            "novalnet_paypal_reference2":{  
-               "type":"inputText",
-               "required":false,
-               "label":"Config.reference2Label",
-               "options":{  
-                  "tooltip":"Config.novalnetReferenceTooltip",
-                  "defaultValue":""
-               }
             }
          }
       },
@@ -819,19 +856,40 @@
          "label":"Config.NovalnetiDealTab",
          "formFields":{  
             "novalnet_ideal_payment_active":{  
-               "type":"checkBox",
+               "type":"selectBox",
                "required":false,
                "label":"Config.paymentActiveLabel",
                "options":{  
-                  "defaultValue":false
+                  "defaultValue":"0",
+		  "selectBoxValues": [
+              {
+                "value": "1",
+                "caption": "Config.NovalnetEnableConfiguration"
+              },
+              {
+                "value": "0",
+                "caption": "Config.NovalnetDisableConfiguration"
+              }
+            ]
                }
             },
             "novalnet_ideal_test_mode":{  
-               "type":"checkBox",
+               "type":"selectBox",
                "required":false,
                "label":"Config.testModeLabel",
                "options":{  
-                  "defaultValue":false
+                  "defaultValue":"0",
+		       "selectBoxValues": [
+              {
+                "value": "1",
+                "caption": "Config.NovalnetEnableConfiguration"
+              },
+              {
+                "value": "0",
+                "caption": "Config.NovalnetDisableConfiguration"
+              }
+            ]
+		
                }
             },
             "novalnet_ideal_payment_name":{  
@@ -850,30 +908,20 @@
                   "defaultValue":""
                }
             },
+            "novalnet_ideal_payment_logo":{  
+               "type":"inputFile",
+               "required":false,
+               "label":"Config.paymentLogoLabel",
+               "options":{  
+                  "defaultValue":"images/ideal.png"
+               }
+            },
             "novalnet_ideal_order_completion_status":{  
                "type":"inputText",
                "required":false,
                "label":"Config.orderCompletionStatusLabel",
                "options":{  
                   "defaultValue":"7.1"
-               }
-            },
-            "novalnet_ideal_reference1":{  
-               "type":"inputText",
-               "required":false,
-               "label":"Config.reference1Label",
-               "options":{  
-                  "tooltip":"Config.novalnetReferenceTooltip",
-                  "defaultValue":""
-               }
-            },
-            "novalnet_ideal_reference2":{  
-               "type":"inputText",
-               "required":false,
-               "label":"Config.reference2Label",
-               "options":{  
-                  "tooltip":"Config.novalnetReferenceTooltip",
-                  "defaultValue":""
                }
             }
          }
@@ -882,19 +930,40 @@
          "label":"Config.NovalnetEPSTab",
          "formFields":{  
             "novalnet_eps_payment_active":{  
-               "type":"checkBox",
+               "type":"selectBox",
                "required":false,
                "label":"Config.paymentActiveLabel",
                "options":{  
-                  "defaultValue":false
+                  "defaultValue":"0",
+		  "selectBoxValues": [
+              {
+                "value": "1",
+                "caption": "Config.NovalnetEnableConfiguration"
+              },
+              {
+                "value": "0",
+                "caption": "Config.NovalnetDisableConfiguration"
+              }
+            ]
                }
             },
             "novalnet_eps_test_mode":{  
-               "type":"checkBox",
+               "type":"selectBox",
                "required":false,
                "label":"Config.testModeLabel",
                "options":{  
-                  "defaultValue":false
+                  "defaultValue":"0",
+		       "selectBoxValues": [
+              {
+                "value": "1",
+                "caption": "Config.NovalnetEnableConfiguration"
+              },
+              {
+                "value": "0",
+                "caption": "Config.NovalnetDisableConfiguration"
+              }
+            ]
+		
                }
             },
             "novalnet_eps_payment_name":{  
@@ -913,30 +982,20 @@
                   "defaultValue":""
                }
             },
+            "novalnet_eps_payment_logo":{  
+               "type":"inputFile",
+               "required":false,
+               "label":"Config.paymentLogoLabel",
+               "options":{  
+                  "defaultValue":"images/eps.png"
+               }
+            },
             "novalnet_eps_order_completion_status":{  
                "type":"inputText",
                "required":false,
                "label":"Config.orderCompletionStatusLabel",
                "options":{  
                   "defaultValue":"7.1"
-               }
-            },
-            "novalnet_eps_reference1":{  
-               "type":"inputText",
-               "required":false,
-               "label":"Config.reference1Label",
-               "options":{  
-                  "tooltip":"Config.novalnetReferenceTooltip",
-                  "defaultValue":""
-               }
-            },
-            "novalnet_eps_reference2":{  
-               "type":"inputText",
-               "required":false,
-               "label":"Config.reference2Label",
-               "options":{  
-                  "tooltip":"Config.novalnetReferenceTooltip",
-                  "defaultValue":""
                }
             }
          }
@@ -945,19 +1004,40 @@
          "label":"Config.NovalnetGiropayTab",
          "formFields":{  
             "novalnet_giropay_payment_active":{  
-               "type":"checkBox",
+               "type":"selectBox",
                "required":false,
                "label":"Config.paymentActiveLabel",
                "options":{  
-                  "defaultValue":false
+                  "defaultValue":"0",
+		  "selectBoxValues": [
+              {
+                "value": "1",
+                "caption": "Config.NovalnetEnableConfiguration"
+              },
+              {
+                "value": "0",
+                "caption": "Config.NovalnetDisableConfiguration"
+              }
+            ]
                }
             },
             "novalnet_giropay_test_mode":{  
-               "type":"checkBox",
+               "type":"selectBox",
                "required":false,
                "label":"Config.testModeLabel",
                "options":{  
-                  "defaultValue":false
+                  "defaultValue":"0",
+		       "selectBoxValues": [
+              {
+                "value": "1",
+                "caption": "Config.NovalnetEnableConfiguration"
+              },
+              {
+                "value": "0",
+                "caption": "Config.NovalnetDisableConfiguration"
+              }
+            ]
+		
                }
             },
             "novalnet_giropay_payment_name":{  
@@ -976,30 +1056,20 @@
                   "defaultValue":""
                }
             },
+            "novalnet_giropay_payment_logo":{  
+               "type":"inputFile",
+               "required":false,
+               "label":"Config.paymentLogoLabel",
+               "options":{  
+                  "defaultValue":"images/giropay.png"
+               }
+            },
             "novalnet_giropay_order_completion_status":{  
                "type":"inputText",
                "required":false,
                "label":"Config.orderCompletionStatusLabel",
                "options":{  
                   "defaultValue":"7.1"
-               }
-            },
-            "novalnet_giropay_reference1":{  
-               "type":"inputText",
-               "required":false,
-               "label":"Config.reference1Label",
-               "options":{  
-                  "tooltip":"Config.novalnetReferenceTooltip",
-                  "defaultValue":""
-               }
-            },
-            "novalnet_giropay_reference2":{  
-               "type":"inputText",
-               "required":false,
-               "label":"Config.reference2Label",
-               "options":{  
-                  "tooltip":"Config.novalnetReferenceTooltip",
-                  "defaultValue":""
                }
             }
          }
@@ -1008,19 +1078,40 @@
          "label":"Config.NovalnetPrzelewy24Tab",
          "formFields":{  
             "novalnet_przelewy_payment_active":{  
-               "type":"checkBox",
+               "type":"selectBox",
                "required":false,
                "label":"Config.paymentActiveLabel",
                "options":{  
-                  "defaultValue":false
+                  "defaultValue":"0",
+		  "selectBoxValues": [
+              {
+                "value": "1",
+                "caption": "Config.NovalnetEnableConfiguration"
+              },
+              {
+                "value": "0",
+                "caption": "Config.NovalnetDisableConfiguration"
+              }
+            ]
                }
             },
             "novalnet_przelewy_test_mode":{  
-               "type":"checkBox",
+               "type":"selectBox",
                "required":false,
                "label":"Config.testModeLabel",
                "options":{  
-                  "defaultValue":false
+                  "defaultValue":"0",
+		       "selectBoxValues": [
+              {
+                "value": "1",
+                "caption": "Config.NovalnetEnableConfiguration"
+              },
+              {
+                "value": "0",
+                "caption": "Config.NovalnetDisableConfiguration"
+              }
+            ]
+		
                }
             },
             "novalnet_przelewy_payment_name":{  
@@ -1039,6 +1130,14 @@
                   "defaultValue":""
                }
             },
+            "novalnet_przelewy_payment_logo":{  
+               "type":"inputFile",
+               "required":false,
+               "label":"Config.paymentLogoLabel",
+               "options":{  
+                  "defaultValue":"images/przelewy.png"
+               }
+            },
             "novalnet_przelewy_payment_pending_status":{  
                "type":"inputText",
                "required":false,
@@ -1053,24 +1152,6 @@
                "label":"Config.orderCompletionStatusLabel",
                "options":{  
                   "defaultValue":"7.1"
-               }
-            },
-            "novalnet_przelewy_reference1":{  
-               "type":"inputText",
-               "required":false,
-               "label":"Config.reference1Label",
-               "options":{  
-                  "tooltip":"Config.novalnetReferenceTooltip",
-                  "defaultValue":""
-               }
-            },
-            "novalnet_przelewy_reference2":{  
-               "type":"inputText",
-               "required":false,
-               "label":"Config.reference2Label",
-               "options":{  
-                  "tooltip":"Config.novalnetReferenceTooltip",
-                  "defaultValue":""
                }
             }
          }

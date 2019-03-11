@@ -19,7 +19,7 @@ To set up the merchant credentials, navigate to the path **Plugins -> Plugin ove
 ### Novalnet Global Configuration
 
 - Fill in your Novalnet merchant account details to make the payment method appear in the online store.
-- The fields **Activation Key**, **Merchant ID**, **Authentication code**, **Project ID**, **Tariff ID** and **Payment access key** are necessary and also marked mandatory.
+- The fields **Merchant ID**, **Authentication code**, **Project ID**, **Tariff ID** and **Payment access key** are necessary and also marked mandatory.
 - These values can be retrieved from the [Novalnet administration portal](https://admin.novalnet.de/).
 - After filling those values in the respective fields, you must check the option **Enable payment method** to complete the Novalnet payment setup in your store.
 
@@ -84,12 +84,6 @@ To set up the merchant credentials, navigate to the path **Plugins -> Plugin ove
         </tr>
         <tr>
             <td>
-                <b>Set a limit for on-hold transaction</b> (in minimum unit of currency. E.g. enter 100 which is equal to 1.00)
-            </td>
-            <td>In case the order amount exceeds mentioned limit, the transaction will be set on hold till your confirmation of transaction.</td>
-        </tr>
-        <tr>
-            <td>
                 <b>Referrer ID</b>
             </td>
             <td>
@@ -109,13 +103,19 @@ To set up the merchant credentials, navigate to the path **Plugins -> Plugin ove
             <td>On activating 3D-Secure, the issuing bank prompts the buyer for a password. This helps in preventing a fraudulent payment. It can be used by the issuing bank as evidence that the buyer is indeed the card holder. This is intended to help decrease a risk of charge-back.</td>
         </tr>
         <tr>
+            <td>
+                <b>Set a limit for on-hold transaction</b> (in minimum unit of currency. E.g. enter 100 which is equal to 1.00)
+            </td>
+            <td>In case the order amount exceeds mentioned limit, the transaction will be set on hold till your confirmation of transaction.</td>
+        </tr>
+        <tr>
         <td class="th" align=CENTER colspan="2">Direct Debit SEPA</td>
         </tr>
         <tr>
             <td>
-                <b>SEPA payment duration (in days)</b>
+                <b>Set a limit for on-hold transaction</b> (in minimum unit of currency. E.g. enter 100 which is equal to 1.00)
             </td>
-            <td>Number of days after which the payment should be processed (must be greater than 6 days).</td>
+            <td>In case the order amount exceeds mentioned limit, the transaction will be set on hold till your confirmation of transaction.</td>
         </tr>
         <td class="th" align=CENTER colspan="2">Invoice / Prepayment</td>
         <tr>
@@ -124,12 +124,25 @@ To set up the merchant credentials, navigate to the path **Plugins -> Plugin ove
             </td>
             <td>Number of days to transfer the payment amount to Novalnet (must be greater than 7 days). In case if the field is empty, 14 days will be set as due date by default.</td>
         </tr>
+        <tr>
+            <td>
+                <b>Set a limit for on-hold transaction</b> (in minimum unit of currency. E.g. enter 100 which is equal to 1.00)
+            </td>
+            <td>In case the order amount exceeds mentioned limit, the transaction will be set on hold till your confirmation of transaction.</td>
+        </tr>
         <td class="th" align=CENTER colspan="2">Barzahlen</td>
         <tr>
             <td>
                 <b>Slip expiry date (in days)</b>
             </td>
             <td>Enter the number of days to pay the amount at store near you. If the field is empty, 14 days will be set as due date by default.</td>
+        </tr>
+        <td class="th" align=CENTER colspan="2">Paypal</td>
+        <tr>
+            <td>
+                <b>Set a limit for on-hold transaction</b> (in minimum unit of currency. E.g. enter 100 which is equal to 1.00)
+            </td>
+            <td>In case the order amount exceeds mentioned limit, the transaction will be set on hold till your confirmation of transaction.</td>
         </tr>
     </tbody>
 </table>
@@ -140,7 +153,7 @@ To display the payment transaction details on the order confirmation page, perfo
 
 ##### Displaying transaction details:
 
-1. Go to **Plugins » Content**.
+1. Go to **CMS » Container links**..
 3. Go to the **Novalnet payment details** area.
 4. Activate the container **Order confirmation: Additional payment information**.
 5. **Save** the settings.<br />→ The payment transaction details will be displayed on the order confirmation page.

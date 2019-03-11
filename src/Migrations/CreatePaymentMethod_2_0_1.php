@@ -8,7 +8,7 @@
  * @copyright Novalnet
  * @license GNU General Public License
  *
- * Script : CreatePaymentMethod.php
+ * Script : CreatePaymentMethod_2_0_1.php
  *
  */
  
@@ -24,8 +24,7 @@ use Novalnet\Helper\PaymentHelper;
  *
  * @package Novalnet\Migrations
  */
- 
-class CreatePaymentMethod
+class CreatePaymentMethod_2_0_1
 {
     /**
      * @var PaymentMethodRepositoryContract

@@ -1,4 +1,4 @@
-<form method="post" name="novalnet_redirect_form" action="{{nnPaymentUrl}}">
+<form method="post" name="novalnet_redirect_form" id="novalnet_redirect_form"  action="{{nnPaymentUrl}}">
     {% for dataKey,dataValue in formData %}
         <input id="{{dataKey}}" value="{{dataValue}}" name="{{dataKey}}" type="hidden"/>
     {% endfor %}
@@ -8,3 +8,8 @@
         {{ trans("Novalnet::PaymentMethod.submit_button_text") }}
     </button>
 </form>
+
+<script type="text/javascript">
+document.getElementById('novalnet_redirect_form').submit();
+</script>
+

@@ -8,8 +8,9 @@
  * recommendation as well as a comment on merchant form
  * would be greatly appreciated.
  *
- * @author       Novalnet
- * @copyright(C) Novalnet. All rights reserved. <https://www.novalnet.de/>
+ * @author       Novalnet AG
+ * @copyright(C) Novalnet AG
+ * All rights reserved. https://www.novalnet.de/payment-plugins/kostenpflichtig/lizenz
  */
 
 namespace Novalnet\Methods;
@@ -18,7 +19,7 @@ use Plenty\Plugin\ConfigRepository;
 use Plenty\Modules\Payment\Method\Contracts\PaymentMethodService;
 use Plenty\Plugin\Application;
 use Novalnet\Helper\PaymentHelper;
-
+use Plenty\Plugin\Log\Loggable;
 /**
  * Class NovalnetCcPaymentMethod
  *
@@ -26,6 +27,7 @@ use Novalnet\Helper\PaymentHelper;
  */
 class NovalnetCcPaymentMethod extends PaymentMethodService
 {
+    use Loggable;
     /**
      * @var ConfigRepository
      */
@@ -57,50 +59,47 @@ class NovalnetCcPaymentMethod extends PaymentMethodService
      */
     public function isActive():bool
     {
-        return (bool)(($this->configRepository->get('Novalnet.novalnet_cc_payment_active') == 'true') && is_numeric($this->paymentHelper->getNovalnetConfig('novalnet_vendor_id')) && !empty($this->paymentHelper->getNovalnetConfig('novalnet_activation_key'))&& !empty($this->paymentHelper->getNovalnetConfig('novalnet_auth_code')) && is_numeric($this->paymentHelper->getNovalnetConfig('novalnet_product_id')) && is_numeric($this->paymentHelper->getNovalnetConfig('novalnet_tariff_id')) && !empty($this->paymentHelper->getNovalnetConfig('novalnet_access_key')));
+        return (bool)(($this->configRepository->get('Novalnet.novalnet_cc_payment_active')) && $this->paymentHelper->paymentActive());
     }
 
     /**
-     * Get the name of the payment method. The name can be entered in the config.json.
+     * Get the name of the payment method. The name can be entered in the configuration.
      *
-     * @param ConfigRepository $configRepository
      * @return string
      */
     public function getName():string
-    {   
-        if(empty($name = trim($this->configRepository->get('Novalnet.novalnet_cc_payment_name'))))
-        {
-            $name = $this->paymentHelper->getTranslatedText('cc_name');
-        }
-        return $name;
+    {   $name = trim($this->configRepository->get('Novalnet.novalnet_cc_payment_name'));
+        return ($name ? $name : $this->paymentHelper->getTranslatedText('novalnet_cc'));
     }
 
     /**
-     * Retrieves the icon of the Novalnet payments. The URL can be entered in the config.json.
+     * Retrieves the icon of the payment. The URL can be entered in the configuration.
      *
      * @return string
      */
     public function getIcon():string
     {
-        /** @var Application $app */
-        $app = pluginApp(Application::class);
-        return $app->getUrlPath('novalnet') .'/images/cc.png';
+        $logoUrl = $this->configRepository->get('Novalnet.novalnet_cc_payment_logo');
+        if($logoUrl == 'images/cc.png'){
+            /** @var Application $app */
+            $app = pluginApp(Application::class);
+            $logoUrl = $app->getUrlPath('novalnet') .'/images/cc.png';
+        } 
+        return $logoUrl;
+        
     }
 
     /**
-     * Retrieves the description of the Novalnet payments. The description can be entered in the config.json.
+     * Retrieves the description of the payment. The description can be entered in the configuration.
      *
      * @return string
      */
     public function getDescription():string
     {
-        if(empty($description = trim($this->configRepository->get('Novalnet.novalnet_cc_description'))))
-        {
-            if($this->configRepository->get('Novalnet.novalnet_cc_3d') == 'true')
-                $description = $this->paymentHelper->getTranslatedText('redirectional_payment_description');
-            else
-                $description = $this->paymentHelper->getTranslatedText('cc_payment_description');
-        }
+		$description = trim($this->configRepository->get('Novalnet.novalnet_cc_description'));
+		$description = ($description ? $description : $this->paymentHelper->getTranslatedText('cc_payment_description'));
+		if($this->configRepository->get('Novalnet.novalnet_cc_3d') == 'true' || $this->configRepository->get('Novalnet.novalnet_cc_fraudcheck' == 'true') )
+			$description .= $this->paymentHelper->getTranslatedText('redirectional_payment_description');
         return $description;
     }
 

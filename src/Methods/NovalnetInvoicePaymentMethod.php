@@ -4,12 +4,14 @@
  * Novalnet payment module of customers.
  * Released under the GNU General Public License.
  * This free contribution made by request.
+ * 
  * If you have found this script useful a small
  * recommendation as well as a comment on merchant form
  * would be greatly appreciated.
  *
- * @author       Novalnet
- * @copyright(C) Novalnet. All rights reserved. <https://www.novalnet.de/>
+ * @author       Novalnet AG
+ * @copyright(C) Novalnet AG
+ * All rights reserved. https://www.novalnet.de/payment-plugins/kostenpflichtig/lizenz
  */
 
 namespace Novalnet\Methods;
@@ -57,48 +59,44 @@ class NovalnetInvoicePaymentMethod extends PaymentMethodService
      */
     public function isActive():bool
     {
-       return (bool)(($this->configRepository->get('Novalnet.novalnet_invoice_payment_active') == 'true') && is_numeric($this->paymentHelper->getNovalnetConfig('novalnet_vendor_id')) && !empty($this->paymentHelper->getNovalnetConfig('novalnet_auth_code')) && is_numeric($this->paymentHelper->getNovalnetConfig('novalnet_product_id')) && is_numeric($this->paymentHelper->getNovalnetConfig('novalnet_tariff_id')) && !empty($this->paymentHelper->getNovalnetConfig('novalnet_access_key')));
+       return (bool)(($this->configRepository->get('Novalnet.novalnet_invoice_payment_active')) && $this->paymentHelper->paymentActive());
     }
 
     /**
-     * Get the name of the payment method. The name can be entered in the config.json.
+     * Get the name of the payment method. The name can be entered in the configuration.
      *
-     * @param ConfigRepository $configRepository
      * @return string
      */
     public function getName():string
     {   
-        if(empty($name = trim($this->configRepository->get('Novalnet.novalnet_invoice_payment_name'))))
-        {
-            $name = $this->paymentHelper->getTranslatedText('invoice_name');
-        }
-        return $name;
+		$name = trim($this->configRepository->get('Novalnet.novalnet_invoice_payment_name'));
+        return ($name ? $name : $this->paymentHelper->getTranslatedText('novalnet_invoice'));
     }
 
     /**
-     * Retrieves the icon of the Novalnet payments. The URL can be entered in the config.json.
+     * Retrieves the icon of the payment. The URL can be entered in the configuration.
      *
      * @return string
      */
     public function getIcon():string
     {
-        /** @var Application $app */
-        $app = pluginApp(Application::class);
-        return $app->getUrlPath('novalnet') .'/images/invoice.png';
+        $logoUrl = $this->configRepository->get('Novalnet.novalnet_invoice_payment_logo');
+        if($logoUrl == 'images/invoice.png'){
+            /** @var Application $app */
+            $app = pluginApp(Application::class);
+            $logoUrl = $app->getUrlPath('novalnet') .'/images/invoice.png';
+        } 
+        return $logoUrl;
     }
-
     /**
-     * Retrieves the description of the Novalnet payments. The description can be entered in the config.json.
+     * Retrieves the description of the payment. The description can be entered in the configuration.
      *
      * @return string
      */
     public function getDescription():string
     {
-        if(empty($description = trim($this->configRepository->get('Novalnet.novalnet_invoice_description'))))
-        {
-            $description = $this->paymentHelper->getTranslatedText('invoice_prepayment_payment_description');
-        }
-        return $description;
+		$description = trim($this->configRepository->get('Novalnet.novalnet_invoice_description'));
+        return ($description ? $description : $this->paymentHelper->getTranslatedText('invoice_prepayment_payment_description'));
     }
 
     /**
