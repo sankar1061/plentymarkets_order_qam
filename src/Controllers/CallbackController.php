@@ -151,7 +151,7 @@ class CallbackController extends Controller
 							'DEBT_COLLECTION_DE',
 							'REVERSAL'
 						],
-			'novalnet_banktransfer' => [
+			'novalnet_sofort' => [
 							'ONLINE_TRANSFER',
 							'REVERSAL',
 							'ONLINE_TRANSFER_CREDIT',
