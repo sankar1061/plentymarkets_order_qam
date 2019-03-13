@@ -277,6 +277,7 @@ class NovalnetServiceProvider extends ServiceProvider
 									$serverRequestData = $paymentService->getRequestParameters($basketRepository->load(), $paymentKey);
 									$sessionStorage->getPlugin()->setValue('nnPaymentData', $serverRequestData['data']);
 									//$response = $paymentHelper->executeCurl($serverRequestData['data'], $serverRequestData['url']);
+										$response['response'] = array();
 									$responseData = $paymentHelper->convertStringToArray($response['response'], '&');
 									$responseData['payment_id'] = (!empty($responseData['payment_id'])) ? $responseData['payment_id'] : $responseData['key'];
 									$sessionStorage->getPlugin()->setValue('nnPaymentData', array_merge($serverRequestData['data'], $responseData));
