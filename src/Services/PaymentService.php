@@ -324,7 +324,15 @@ class PaymentService
         if(!empty($basket->customerShippingAddressId)){
             $shippingAddress = $this->addressRepository->findAddressById($basket->customerShippingAddressId);
         }
-
+	
+	    foreach ($address->options as $option) {
+		 if($option->typeId == 12)
+				  {
+						$name = $option->value;
+				  }   
+		    
+	    }
+        $this->getLogger(__METHOD__)->error('add', $name);
         $account = pluginApp(AccountService::class);
         $customerId = $account->getAccountContactId();
         $paymentKeyLower = strtolower((string) $paymentKey);
