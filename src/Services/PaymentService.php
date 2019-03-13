@@ -357,6 +357,8 @@ class PaymentService
             'key'                => $this->getkeyByPaymentKey($paymentKey),
             'payment_type'       => $this->getTypeByPaymentKey($paymentKey)
         ];
+	    
+	     $this->getLogger(__METHOD__)->error('request.log', $address);
 
         if(!empty($address->houseNumber))
         {
