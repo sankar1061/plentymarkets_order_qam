@@ -578,6 +578,8 @@ class CallbackController extends Controller
 					$orderObj->order_paid_amount = $amount;
 				}
 			}
+			
+			$this->getLogger(__METHOD__)->error('callbacknoval.log', $orderDetails->paymentName);
 
 			if (!isset($orderDetails->paymentName) || !in_array($this->aryCaptureParams['payment_type'], $this->aryPaymentGroups[$orderDetails->paymentName]))
 			{
