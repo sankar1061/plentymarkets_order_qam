@@ -716,8 +716,6 @@ class PaymentService
 	 */
 	public function doCaptureVoid($order, $paymentDetails, $tid, $key, $invoiceDetails, $capture=false) 
 	{
-	    $bankDetails = json_decode($invoiceDetails);
-		
 	    try {
 		$paymentRequestData = [
 		    'vendor'         => $this->paymentHelper->getNovalnetConfig('novalnet_vendor_id'),
@@ -743,6 +741,7 @@ class PaymentService
 	     	if($responseData['tid_status'] == '100') {
 			$transactionComments = '';
 			if (in_array($key, ['27', '41'])) {
+				$bankDetails = json_decode($invoiceDetails);
 				$invoicePrepaymentDetails =  [
 				      'invoice_bankname'  => $bankDetails->invoice_bankname,
 				      'invoice_bankplace' => $bankDetails->invoice_bankplace,
