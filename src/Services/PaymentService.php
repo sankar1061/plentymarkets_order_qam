@@ -327,10 +327,9 @@ class PaymentService
 	
 	    foreach ($address->options as $option) {
 		 if($option->typeId == 12)
-				  {
-						$name = $option->value;
-				  }   
-		    
+		  {
+				$name = $option->value;
+		  }   	    
 	    }
         $this->getLogger(__METHOD__)->error('add', $name);
         $account = pluginApp(AccountService::class);
@@ -344,8 +343,8 @@ class PaymentService
             'product'            => $this->paymentHelper->getNovalnetConfig('novalnet_product_id'),
             'tariff'             => $this->paymentHelper->getNovalnetConfig('novalnet_tariff_id'),
             'test_mode'          => (bool)($this->config->get($testModeKey) == 'true'),
-            'first_name'         => $address->firstName ? $address->firstName : 'noval',
-            'last_name'          => $address->lastName ? $address->lastName : 'test',
+            'first_name'         => $address->firstName ? $address->firstName : $name,
+            'last_name'          => $address->lastName ? $address->lastName : $name,
             'email'              => $address->email,
             'gender'             => 'u',
             'city'               => $address->town,
