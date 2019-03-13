@@ -110,6 +110,7 @@ class CallbackController extends Controller
 							'CREDITCARD_CHARGEBACK',
 							'CREDIT_ENTRY_CREDITCARD',
 							'DEBT_COLLECTION_CREDITCARD',
+							'TRANSACTION_CANCELLATION',
 							'SUBSCRIPTION_STOP',
 						],
 			'novalnet_sepa'  => [
@@ -165,6 +166,7 @@ class CallbackController extends Controller
 							'PAYPAL',
 							'SUBSCRIPTION_STOP',
 							'PAYPAL_BOOKBACK',
+							'TRANSACTION_CANCELLATION'
 							'REFUND_BY_BANK_TRANSFER_EU'
 						],
 			'novalnet_ideal' => [
