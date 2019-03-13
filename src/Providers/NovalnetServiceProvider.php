@@ -227,7 +227,9 @@ class NovalnetServiceProvider extends ServiceProvider
                             $contentType = 'htmlContent';
 						} elseif($paymentKey == 'NOVALNET_SEPA') {
                                 $paymentProcessUrl = $paymentService->getProcessPaymentUrl();
-				
+								$basket = $basketRepository->load();			
+								$billingAddressId = $basket->customerInvoiceAddressId;
+								$address = $addressRepository->findAddressById($billingAddressId);
                                 $contentType = 'htmlContent';
                                 $guaranteeStatus = $paymentService->getGuaranteeStatus($basketRepository->load(), $paymentKey);
 
@@ -238,9 +240,7 @@ class NovalnetServiceProvider extends ServiceProvider
                                 }
                                 else
                                 {
-                                    $basket = $basketRepository->load();			
-                                    $billingAddressId = $basket->customerInvoiceAddressId;
-                                    $address = $addressRepository->findAddressById($billingAddressId);
+			
 									$content = $twig->render('Novalnet::PaymentForm.NOVALNET_SEPA', [
                                                                     'nnPaymentProcessUrl' => $paymentProcessUrl,
                                                                     'paymentMopKey'     =>  $paymentKey,

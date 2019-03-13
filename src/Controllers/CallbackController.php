@@ -4,12 +4,14 @@
  * Novalnet payment module of customers.
  * Released under the GNU General Public License.
  * This free contribution made by request.
+ * 
  * If you have found this script useful a small
  * recommendation as well as a comment on merchant form
  * would be greatly appreciated.
  *
- * @author       Novalnet
- * @copyright(C) Novalnet. All rights reserved. <https://www.novalnet.de/>
+ * @author       Novalnet AG
+ * @copyright(C) Novalnet AG. 
+ * All rights reserved. https://www.novalnet.de/payment-plugins/kostenpflichtig/lizenz
  */
 
 namespace Novalnet\Controllers;
@@ -394,7 +396,9 @@ class CallbackController extends Controller
 						}
 
 						$this->paymentHelper->createPlentyPayment($paymentData);
+						
 						$this->paymentHelper->updateOrderStatus($nnTransactionHistory->orderNo, $orderStatus);
+						$this->paymentHelper->updatePayments($this->aryCaptureParams['tid'], $this->aryCaptureParams['tid_status'], $nnTransactionHistory->orderNo);
 						$this->paymentHelper->createOrderComments($nnTransactionHistory->orderNo, $callbackComments);
 						$this->sendCallbackMail($callbackComments);
 
@@ -407,7 +411,7 @@ class CallbackController extends Controller
 				}  elseif (in_array($this->aryCaptureParams['payment_type'], ['INVOICE_START', 'GUARANTEED_INVOICE', 'DIRECT_DEBIT_SEPA', 'GUARANTEED_DIRECT_DEBIT_SEPA'] )) {
 				
 					$transactionStatus = $this->payment_details($nnTransactionHistory->orderNo);
-			  
+			               
 					// Checks for Guarantee Onhold
 					if(in_array($this->aryCaptureParams['tid_status'], ['91', '99']) && $transactionStatus == '75') {
 					   
@@ -421,21 +425,22 @@ class CallbackController extends Controller
 						$orderStatus = $this->config->get('Novalnet.novalnet_order_completion_status');	
 					// Checks Guaranteed Invoice
 						if( in_array ( $this->aryCaptureParams['payment_type'], [ 'GUARANTEED_INVOICE', 'INVOICE_START' ] ) ) {
-						   
+						    $paymentDetails = $this->payment_details($nnTransactionHistory->orderNo, true);
+							$bankDetails = json_decode($paymentDetails);
 							$invoicePrepaymentDetails =  [
-								  'invoice_bankname'  => $this->aryCaptureParams['invoice_bankname'],
-								  'invoice_bankplace' => $this->aryCaptureParams['invoice_bankplace'],
+								  'invoice_bankname'  => $bankDetails->invoice_bankname,
+								  'invoice_bankplace' => $bankDetails->invoice_bankplace,
 								  'amount'            => $this->aryCaptureParams['amount'] / 100,
 								  'currency'          => $this->aryCaptureParams['currency'],
 								  'tid'               => $this->aryCaptureParams['tid'],
-								  'invoice_iban'      => $this->aryCaptureParams['invoice_iban'],
-								  'invoice_bic'       => $this->aryCaptureParams['invoice_bic'],
-								  'due_date'          => $this->aryCaptureParams['due_date'],
+								  'invoice_iban'      => $bankDetails->invoice_iban,
+								  'invoice_bic'       => $bankDetails->invoice_bic,
+								  'due_date'          => $bankDetails->due_date,
 								  'product'           => $this->aryCaptureParams['product_id'],
 								  'order_no'          => $nnTransactionHistory->orderNo,
 								  'tid_status'        => $this->aryCaptureParams['tid_status'],
 								  'invoice_type'      => 'INVOICE',
-								  'invoice_account_holder' => $this->aryCaptureParams['invoice_account_holder']
+								  'invoice_account_holder' => $bankDetails->invoice_account_holder
 								];
 							// Checking for Invoice Guarantee
 							
@@ -465,13 +470,14 @@ class CallbackController extends Controller
 							}
 							$this->sendTransactionConfirmMail($callbackComments, $transactionDetails, $nnTransactionHistory->orderNo); 
 					} 
-					$this->updatePayments($this->aryCaptureParams['tid'], $this->aryCaptureParams['tid_status'], $nnTransactionHistory->orderNo);
+					$this->paymentHelper->updatePayments($this->aryCaptureParams['tid'], $this->aryCaptureParams['tid_status'], $nnTransactionHistory->orderNo);
 					return $this->renderTemplate($callbackComments);
 				}  elseif('PRZELEWY24' == $this->aryCaptureParams['payment_type'] && (!in_array($this->aryCaptureParams['tid_status'], ['100','86']) || '100' != $this->aryCaptureParams['status'])){
 					// Przelewy24 cancel.
 					$callbackComments = '</br>' . sprintf($this->paymentHelper->getTranslatedText('callback_transaction_cancellation',$orderLanguage),date('d.m.Y'), date('H:i:s') ) . '</br>';
 					$orderStatus = (float) $this->config->get('Novalnet.novalnet_order_cancel_status');
 					$this->paymentHelper->updateOrderStatus($nnTransactionHistory->orderNo, $orderStatus);
+					$this->paymentHelper->updatePayments($this->aryCaptureParams['tid'], $this->aryCaptureParams['tid_status'], $nnTransactionHistory->orderNo);
 					$this->paymentHelper->createOrderComments($nnTransactionHistory->orderNo, $callbackComments);
 					$this->sendCallbackMail($callbackComments);
 					return $this->renderTemplate($callbackComments);
@@ -578,8 +584,6 @@ class CallbackController extends Controller
 					$orderObj->order_paid_amount = $amount;
 				}
 			}
-			
-			$this->getLogger(__METHOD__)->error('callbacknoval.log', $orderDetails->paymentName);
 
 			if (!isset($orderDetails->paymentName) || !in_array($this->aryCaptureParams['payment_type'], $this->aryPaymentGroups[$orderDetails->paymentName]))
 			{
@@ -624,7 +628,7 @@ class CallbackController extends Controller
 	 * @param int $orderId
 	 * @return int
 	 */
-	public function payment_details($orderId)
+	public function payment_details($orderId, $bankDetails=false)
 	{
 	$payments = $this->paymentRepository->getPaymentsByOrderId( $orderId);
 	foreach ($payments as $payment)
@@ -636,9 +640,14 @@ class CallbackController extends Controller
 		  {
 			$status = $proper->value;
 		  }
+		if ($proper->typeId == 21) 
+			 {
+				 $invoiceDetails = $proper->value;
+			 }
 		}
 		}
-		return $status;
+		$transactionDetails = ($bankDetails == 'true' ) ? $invoiceDetails : $status;
+		return $transactionDetails;
 	}
 
 	/**
@@ -887,28 +896,4 @@ class CallbackController extends Controller
 		$mailer->sendHtml($body, $toAddress, $subject);		
 	}
 	
-	/**
-     * Update the Plenty payment
-     * Return the Plenty payment object
-     *
-     * @param int $tid
-     * @param int $tid_status
-     * @param int $orderId
-     * @return null
-     */
-	public function updatePayments($tid, $tid_status, $orderId)
-    {	  
-        $payments = $this->paymentRepository->getPaymentsByOrderId( $orderId);
-	    
-		foreach ($payments as $payment) {
-        $paymentProperty     = [];
-        $paymentProperty[]   = $this->paymentHelper->getPaymentProperty(PaymentProperty::TYPE_BOOKING_TEXT, $tid);
-        $paymentProperty[]   = $this->paymentHelper->getPaymentProperty(PaymentProperty::TYPE_TRANSACTION_ID, $tid);
-        $paymentProperty[]   = $this->paymentHelper->getPaymentProperty(PaymentProperty::TYPE_ORIGIN, Payment::ORIGIN_PLUGIN);
-		$paymentProperty[]   = $this->paymentHelper->getPaymentProperty(PaymentProperty::TYPE_EXTERNAL_TRANSACTION_STATUS, $tid_status);
-        $payment->properties = $paymentProperty;   
-	
-		$this->paymentRepository->updatePayment($payment);
-		}	   
-    }
 }

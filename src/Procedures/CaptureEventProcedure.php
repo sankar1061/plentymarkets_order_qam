@@ -4,19 +4,21 @@
  * Novalnet payment module of customers.
  * Released under the GNU General Public License.
  * This free contribution made by request.
+ * 
  * If you have found this script useful a small
  * recommendation as well as a comment on merchant form
  * would be greatly appreciated.
  *
- * @author       Novalnet
- * @copyright(C) Novalnet. All rights reserved. <https://www.novalnet.de/>
+ * @author       Novalnet AG
+ * @copyright(C) Novalnet AG. 
+ * All rights reserved. https://www.novalnet.de/payment-plugins/kostenpflichtig/lizenz
  */
+ 
 namespace Novalnet\Procedures;
 
 use Plenty\Modules\EventProcedures\Events\EventProceduresTriggered;
 use Plenty\Modules\Order\Models\Order;
 use Plenty\Plugin\Log\Loggable;
-use Novalnet\Helper\PaymentHelper;
 use Plenty\Modules\Payment\Contracts\PaymentRepositoryContract;
 use Novalnet\Services\PaymentService;
 
@@ -26,12 +28,6 @@ use Novalnet\Services\PaymentService;
 class CaptureEventProcedure
 {
 	use Loggable;
-	
-	/**
-	 *
-	 * @var PaymentHelper
-	 */
-	private $paymentHelper;
 	
 	/**
 	 *
@@ -46,10 +42,8 @@ class CaptureEventProcedure
 	 * @param PaymentService $paymentService
 	 */
 	 
-    public function __construct(PaymentHelper $paymentHelper, 
-								PaymentService $paymentService)
+    public function __construct(PaymentService $paymentService)
     {
-        $this->paymentHelper   = $paymentHelper;
 	    $this->paymentService  = $paymentService;
 	}	
 	
@@ -76,16 +70,20 @@ class CaptureEventProcedure
 				  {
 					$tid = $proper->value;
 				  }
-				 if ($proper->typeId == 30)
+				  if ($proper->typeId == 30)
 				  {
 					$status = $proper->value;
+				  }
+				  if ($proper->typeId == 21) 
+				  {
+					 $invoiceDetails = $proper->value;
 				  }
 			}
 		}
 	    
         $this->getLogger(__METHOD__)->error('EventProcedure.triggerFunction', ['order' => $order]);
 	    if(in_array($status, ['85', '91', '98', '99'])) {
-        $this->paymentHelper->doCaptureVoid($order, $paymentDetails, $tid, $key, true);
+        $this->paymentService->doCaptureVoid($order, $paymentDetails, $tid, $key, $invoiceDetails, true);
 	    } 
 
     }

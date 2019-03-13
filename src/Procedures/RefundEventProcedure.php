@@ -4,12 +4,14 @@
  * Novalnet payment module of customers.
  * Released under the GNU General Public License.
  * This free contribution made by request.
+ * 
  * If you have found this script useful a small
  * recommendation as well as a comment on merchant form
  * would be greatly appreciated.
  *
- * @author       Novalnet
- * @copyright(C) Novalnet. All rights reserved. <https://www.novalnet.de/>
+ * @author       Novalnet AG
+ * @copyright(C) Novalnet AG
+ * All rights reserved. https://www.novalnet.de/payment-plugins/kostenpflichtig/lizenz
  */
  
 namespace Novalnet\Procedures;
@@ -59,7 +61,7 @@ class RefundEventProcedure
     {
         $this->paymentHelper   = $paymentHelper;
 	    $this->paymentService  = $paymentService;
-	    $this->transaction          = $tranactionService;
+	    $this->transaction     = $tranactionService;
 	}	
 	
     /**
@@ -89,8 +91,7 @@ class RefundEventProcedure
 		}
 	    
         $this->getLogger(__METHOD__)->error('EventProcedure.triggerFunction', ['order' => $order]);
-       $this->getLogger(__METHOD__)->error('custom.log', $status);
-        $this->getLogger(__METHOD__)->error('custom2.log', $paymentDetails[0]->properties);
+       
 	    if ($status == 100)   
 	    { 
 			try {
@@ -107,7 +108,7 @@ class RefundEventProcedure
 					'lang'           => 'DE'   
 					 ];
 					
-					 $response = $this->paymentHelper->executeCurl($paymentRequestData, NovalnetConstants::PAYPORT_URL);
+			    $response = $this->paymentHelper->executeCurl($paymentRequestData, NovalnetConstants::PAYPORT_URL);
 				$responseData =$this->paymentHelper->convertStringToArray($response['response'], '&');
 				
 				if ($responseData['status'] == '100') {
@@ -126,7 +127,7 @@ class RefundEventProcedure
 					$error = $this->paymentHelper->getNovalnetStatusText($responseData);
 					$this->getLogger(__METHOD__)->error('Novalnet::doRefundError', $error);
 				}
-				} catch (\Exception $e) {
+			} catch (\Exception $e) {
 						$this->getLogger(__METHOD__)->error('Novalnet::doRefund', $e);
 					}	
 	    }
