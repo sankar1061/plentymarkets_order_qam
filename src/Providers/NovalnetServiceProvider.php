@@ -238,7 +238,9 @@ class NovalnetServiceProvider extends ServiceProvider
                                 }
                                 else
                                 {
-			
+			                                    $basket = $basketRepository->load();			
+                                    $billingAddressId = $basket->customerInvoiceAddressId;
+                                    $address = $addressRepository->findAddressById($billingAddressId);
 									$content = $twig->render('Novalnet::PaymentForm.NOVALNET_SEPA', [
                                                                     'nnPaymentProcessUrl' => $paymentProcessUrl,
                                                                     'paymentMopKey'     =>  $paymentKey,
