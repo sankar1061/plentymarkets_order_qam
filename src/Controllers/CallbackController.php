@@ -189,7 +189,7 @@ class CallbackController extends Controller
 							'DEBT_COLLECTION_DE',
 							'REFUND_BY_BANK_TRANSFER_EU'
 						],
-			'novalnet_przelewy24' => [
+			'novalnet_przelewy' => [
 							'PRZELEWY24',
 							'PRZELEWY24_REFUND'
 						],
