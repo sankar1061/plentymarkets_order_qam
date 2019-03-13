@@ -166,7 +166,7 @@ class CallbackController extends Controller
 							'PAYPAL',
 							'SUBSCRIPTION_STOP',
 							'PAYPAL_BOOKBACK',
-							'TRANSACTION_CANCELLATION'
+							'TRANSACTION_CANCELLATION',
 							'REFUND_BY_BANK_TRANSFER_EU'
 						],
 			'novalnet_ideal' => [
