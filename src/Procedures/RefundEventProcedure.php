@@ -89,7 +89,8 @@ class RefundEventProcedure
 		}
 	    
         $this->getLogger(__METHOD__)->error('EventProcedure.triggerFunction', ['order' => $order]);
-       
+       $this->getLogger(__METHOD__)->error('custom.log', $status);
+        $this->getLogger(__METHOD__)->error('custom2.log', $paymentDetails[0]->properties);
 	    if ($status == 100)   
 	    { 
 			try {
