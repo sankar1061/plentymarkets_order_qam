@@ -21,6 +21,7 @@ use Novalnet\Helper\PaymentHelper;
 use Plenty\Modules\Payment\Contracts\PaymentRepositoryContract;
 use Novalnet\Services\PaymentService;
 use Novalnet\Constants\NovalnetConstants;
+use Novalnet\Services\TransactionService;
 
 /**
  * Class RefundEventProcedure
@@ -42,17 +43,23 @@ class RefundEventProcedure
 	private $paymentService;
 	
 	/**
+	 * @var transaction
+	 */
+	private $transaction;
+	
+	/**
 	 * Constructor.
 	 *
 	 * @param PaymentHelper $paymentHelper
 	 * @param PaymentService $paymentService
 	 */
 	 
-    public function __construct( PaymentHelper $paymentHelper, 
+    public function __construct( PaymentHelper $paymentHelper, TransactionService $tranactionService,
 								 PaymentService $paymentService)
     {
         $this->paymentHelper   = $paymentHelper;
 	    $this->paymentService  = $paymentService;
+	    $this->transaction          = $tranactionService;
 	}	
 	
     /**
@@ -65,31 +72,25 @@ class RefundEventProcedure
         /* @var $order Order */
 	 
 	   $order = $eventTriggered->getOrder(); 
-	  
+	 
 	   $payments = pluginApp(\Plenty\Modules\Payment\Contracts\PaymentRepositoryContract::class);  
        $paymentDetails = $payments->getPaymentsByOrderId($order->id);
 	   $orderAmount = (float) $order->amounts[0]->invoiceTotal;
 	   $paymentKey = $paymentDetails[0]->method->paymentKey;
 	   $key = $this->paymentService->getkeyByPaymentKey($paymentKey);
-	   
-	    foreach ($paymentDetails as $paymentDetail)
+	   $parentOrder = $this->transaction->getTransactionData('orderNo', $order->id);
+	  
+	    foreach ($paymentDetails[0]->properties as $paymentStatus)
 		{
-			$property = $paymentDetail->properties;
-			foreach($property as $proper)
-			{
-				  if($proper->typeId == 1)
+		    if($paymentStatus->typeId == 30)
 				  {
-						$tid = $proper->value;
-				  }
-				 if($proper->typeId == 30)
-				  {
-						$status = $proper->value;
-				  }
-			}
+					$status = $paymentStatus->value;
+				  }	
 		}
+	    
         $this->getLogger(__METHOD__)->error('EventProcedure.triggerFunction', ['order' => $order]);
-        
-	    if ($status == '100' && ($order->amounts[0]->paidAmount) == $orderAmount)   
+       
+	    if ($status == 100)   
 	    { 
 			try {
 				$paymentRequestData = [
@@ -99,33 +100,34 @@ class RefundEventProcedure
 					'tariff'         => $this->paymentHelper->getNovalnetConfig('novalnet_tariff_id'),
 					'key'            => $key, 
 					'refund_request' => 1, 
-					'tid'            => $tid, 
+					'tid'            => $parentOrder[0]->tid, 
 					 'refund_param'  => (float) $orderAmount * 100 ,
 					'remote_ip'      => $this->paymentHelper->getRemoteAddress(),
-					'lang'           => 'EN'   
+					'lang'           => 'DE'   
 					 ];
 					
 					 $response = $this->paymentHelper->executeCurl($paymentRequestData, NovalnetConstants::PAYPORT_URL);
-					  $responseData =$this->paymentHelper->convertStringToArray($response['response'], '&');	 
+				$responseData =$this->paymentHelper->convertStringToArray($response['response'], '&');
+				
 				if ($responseData['status'] == '100') {
-					 $transactionComments = PHP_EOL . sprintf($this->paymentHelper->getTranslatedText('refund_message', $paymentRequestData['lang']), $tid, (float) $orderAmount * 100);
+					$paymentData['currency']    = $paymentDetails[0]->currency;
+					$paymentData['paid_amount'] = (float) $orderAmount;
+					$paymentData['tid']         = $parentOrder[0]->tid;
+					$paymentData['order_no']    = $order->id;
+					$paymentData['type']        = 'debit';
+					$paymentData['mop']         = $paymentDetails[0]->mopId;
+
+					 $this->paymentHelper->createPlentyPayment($paymentData);	
+					 $transactionComments = PHP_EOL . sprintf($this->paymentHelper->getTranslatedText('refund_message', $paymentRequestData['lang']), $parentOrder[0]->tid, (float) $orderAmount);
 					 $this->paymentHelper->createOrderComments((int)$order->id, $transactionComments);
-					} else {
+					
+				} else {
 					$error = $this->paymentHelper->getNovalnetStatusText($responseData);
 					$this->getLogger(__METHOD__)->error('Novalnet::doRefundError', $error);
 				}
 				} catch (\Exception $e) {
 						$this->getLogger(__METHOD__)->error('Novalnet::doRefund', $e);
-					}
-				
-				$paymentData['currency']    = $paymentDetails[0]->currency;
-				$paymentData['paid_amount'] = (float) $orderAmount;
-				$paymentData['tid']         = $tid;
-				$paymentData['order_no']    = $order->id;
-				$paymentData['type']        = 'debit';
-				$paymentData['mop']         = $paymentDetails[0]->mopId;
-				
-				$this->paymentHelper->createPlentyPayment($paymentData);
+					}	
 	    }
     }
 }

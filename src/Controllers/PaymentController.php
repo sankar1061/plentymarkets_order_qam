@@ -33,7 +33,7 @@ use Plenty\Plugin\ConfigRepository;
  * @package Novalnet\Controllers
  */
 class PaymentController extends Controller
-{
+{  
 	/**
 	 * @var Request
 	 */
@@ -138,9 +138,6 @@ class PaymentController extends Controller
 	public function processPayment()
 	{
 		$requestData = $this->request->all();
-		$basket = $this->basketRepository->load();
-		$billingAddressId = $basket->customerInvoiceAddressId;
-        	$address = $this->addressRepository->findAddressById($billingAddressId);
 		$serverRequestData = $this->paymentService->getRequestParameters($this->basketRepository->load(), $requestData['paymentKey']);
 		$this->sessionStorage->getPlugin()->setValue('nnPaymentData', $serverRequestData['data']);
 		$guarantee_payments = [ 'NOVALNET_SEPA', 'NOVALNET_INVOICE' ];        
@@ -171,7 +168,7 @@ class PaymentController extends Controller
 				$force_status = ( $requestData['paymentKey'] == 'NOVALNET_SEPA' ) ? 'Novalnet.novalnet_sepa_payment_guarantee_force_active' : 'Novalnet.novalnet_invoice_payment_guarantee_force_active';				
 				
 				// Proceed as Normal Payment if condition for birthdate doesn't meet as well as force is enable    
-				if ($this->config->get( $force_status ) == 'true' && empty($address->companyName) && (empty($birthday) || time() < strtotime('+18 years', strtotime($birthday)))) {	
+				if ($this->config->get( $force_status ) == 'true' && (empty($birthday) || time() < strtotime('+18 years', strtotime($birthday)))) {	
 					if( $requestData['paymentKey'] == 'NOVALNET_SEPA' ) {
 					$serverRequestData['data']['payment_type'] = 'DIRECT_DEBIT_SEPA';
 					$serverRequestData['data']['key']          = '37';
@@ -181,7 +178,7 @@ class PaymentController extends Controller
 					}
 					
 				}
-				else if( empty($address->companyName) && empty( $birthday ) )
+				else if( empty( $birthday ))
 				{			
 					$notifications = json_decode($this->sessionStorage->getPlugin()->getValue('notifications'));
 					array_push($notifications,[
@@ -192,7 +189,7 @@ class PaymentController extends Controller
 					$this->sessionStorage->getPlugin()->setValue('notifications', json_encode($notifications));
 					return $this->response->redirectTo('checkout');
 				}
-				else if(empty($address->companyName) && time() < strtotime('+18 years', strtotime($birthday)))
+				else if( time() < strtotime('+18 years', strtotime($birthday)))
 				{
 			
 					$notifications = json_decode($this->sessionStorage->getPlugin()->getValue('notifications'));
@@ -207,7 +204,7 @@ class PaymentController extends Controller
 				else
 				{
 			
-			// Guarantee Params Formation 
+					// Guarantee Params Formation 
 					if( $requestData['paymentKey'] == 'NOVALNET_SEPA' ) {
 					$serverRequestData['data']['payment_type'] = 'GUARANTEED_DIRECT_DEBIT_SEPA';
 					$serverRequestData['data']['key']          = '40';

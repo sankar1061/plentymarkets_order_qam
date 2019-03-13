@@ -82,7 +82,7 @@ class NovalnetServiceProvider extends ServiceProvider
      */
     public function boot( Dispatcher $eventDispatcher,
                           PaymentHelper $paymentHelper,
-			  AddressRepositoryContract $addressRepository,
+						  AddressRepositoryContract $addressRepository,
                           PaymentService $paymentService,
                           BasketRepositoryContract $basketRepository,
                           PaymentMethodContainer $payContainer,
@@ -207,8 +207,8 @@ class NovalnetServiceProvider extends ServiceProvider
                     {		
 						$paymentKey = $paymentHelper->getPaymentKeyByMop($event->getMop());	
 						$guaranteeStatus = $paymentService->getGuaranteeStatus($basketRepository->load(), $paymentKey);
-	
-			    $redirect = $paymentService->isRedirectPayment($paymentKey);		
+						$redirect = $paymentService->isRedirectPayment($paymentKey);	
+							
 						if ($redirect && $paymentKey != 'NOVALNET_CC') { # Redirection payments
 							$serverRequestData = $paymentService->getRequestParameters($basketRepository->load(), $paymentKey);
                             $sessionStorage->getPlugin()->setValue('nnPaymentData', $serverRequestData['data']);
@@ -227,9 +227,7 @@ class NovalnetServiceProvider extends ServiceProvider
                             $contentType = 'htmlContent';
 						} elseif($paymentKey == 'NOVALNET_SEPA') {
                                 $paymentProcessUrl = $paymentService->getProcessPaymentUrl();
-				$basket = $basketRepository->load();			
-				$billingAddressId = $basket->customerInvoiceAddressId;
-        			$address = $addressRepository->findAddressById($billingAddressId);
+				
                                 $contentType = 'htmlContent';
                                 $guaranteeStatus = $paymentService->getGuaranteeStatus($basketRepository->load(), $paymentKey);
 
@@ -240,17 +238,17 @@ class NovalnetServiceProvider extends ServiceProvider
                                 }
                                 else
                                 {
-                                $content = $twig->render('Novalnet::PaymentForm.NOVALNET_SEPA', [
+			
+									$content = $twig->render('Novalnet::PaymentForm.NOVALNET_SEPA', [
                                                                     'nnPaymentProcessUrl' => $paymentProcessUrl,
                                                                     'paymentMopKey'     =>  $paymentKey,
-								    'endcustomername'=> $address->firstName .' '. $address->lastName,
-                                                                    'nnGuaranteeStatus' =>  $guaranteeStatus
+																	'endcustomername'=> $address->firstName .' '. $address->lastName,
+                                                                    'nnGuaranteeStatus' =>  $guaranteeStatus 
                                                  ]);
                                 }
                             } else {
 								if(in_array($paymentKey, ['NOVALNET_INVOICE', 'NOVALNET_PREPAYMENT', 'NOVALNET_CASHPAYMENT']))
 								{
-				
 									$processDirect = true;
 									if($paymentKey == 'NOVALNET_INVOICE')
 									{
@@ -267,9 +265,9 @@ class NovalnetServiceProvider extends ServiceProvider
 											$paymentProcessUrl = $paymentService->getProcessPaymentUrl();
 											$content = $twig->render('Novalnet::PaymentForm.NOVALNET_INVOICE', [
 																'nnPaymentProcessUrl' => $paymentProcessUrl,
-																'paymentMopKey'     =>  $paymentKey,
-																'nnGuaranteeStatus' =>  $guaranteeStatus
-											]);
+																'paymentMopKey'     =>  $paymentKey
+											
+											]); 
 											$contentType = 'htmlContent';
 										 }
 									}

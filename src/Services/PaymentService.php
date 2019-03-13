@@ -139,7 +139,12 @@ class PaymentService
             'payment_name'     => $nnPaymentData['payment_method'],
             'order_no'         => $nnPaymentData['order_no'],
         ];
-		
+	    
+	    
+		if(in_array($nnPaymentData['payment_id'], ['27', '59']) || (in_array($nnPaymentData['tid_status'], ['85','86','90'])))
+            $transactionData['callback_amount'] = 0;	
+	    
+	    
         $this->transactionLogData->saveTransaction($transactionData);
         
         if(!$this->isRedirectPayment(strtoupper($nnPaymentData['payment_method']))) {
@@ -173,7 +178,7 @@ class PaymentService
 					$requestData['paid_amount'] = 0;
 				} else {
 					$requestData['order_status'] = trim($this->config->get('Novalnet.'. $requestData['payment_method'] .'_order_completion_status'));
-					$requestData['paid_amount'] = ($requestData['tid_status'] == 100 ) ? $requestData['amount'] : 0;
+					$requestData['paid_amount'] = ($requestData['tid_status'] == '100') ? $requestData['amount'] : '0';
 				}
             } else {
                 $requestData['order_status'] = trim($this->config->get('Novalnet.novalnet_order_cancel_status'));

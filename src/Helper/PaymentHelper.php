@@ -616,7 +616,7 @@ class PaymentHelper
 	    'edit_status'    => '1', 
 	    'tid'            => $tid, 
 	    'remote_ip'      => $this->getRemoteAddress(),
-	    'lang'           => 'EN'  
+	    'lang'           => 'DE'  
 	     ];
 		
 	    if($capture) {
@@ -630,7 +630,7 @@ class PaymentHelper
 	     if ($responseData['status'] == '100') {
 	     if($responseData['tid_status'] == '100') {
 			if (in_array($key, ['6', '34', '37', '40', '41'])) {
-	        $paymentData['currency']    = $paymentDetails[0]->currency;
+	        	$paymentData['currency']    = $paymentDetails[0]->currency;
 			$paymentData['paid_amount'] = (float) $order->amounts[0]->invoiceTotal;
 			$paymentData['tid']         = $tid;
 			$paymentData['order_no']    = $order->id;
@@ -678,10 +678,21 @@ class PaymentHelper
 		$this->paymentRepository->updatePayment($payment);
 		}	   
     }
+    
+    /**
+     * @param int $days
+     * 
+     * @return date
+     */
 	public function dateFormatter($days) {
 		return date( 'Y-m-d', strtotime( date( 'y-m-d' ) . '+ ' . $days . ' days' ) );
 	}
 	
+	 /**
+     * @param float $amount
+     * 
+     * @return amount
+     */
 	public function ConvertAmountToSmallerUnit($amount) {
 		return sprintf('%0.2f', $amount) * 100;
 	}

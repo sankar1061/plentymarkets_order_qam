@@ -20,15 +20,19 @@ function initIframe()
 }
 
 function getHash(e)
-{
+{	
 	if($('#nn_pan_hash').val().trim() == '') {
-	iframeWindow.postMessage(
-		JSON.stringify(
-			{
-			'callBack': 'getHash',
-			}
-		), targetOrigin
-	);
+		e.preventDefault();
+		e.stopImmediatePropagation();
+		iframeWindow.postMessage(
+			JSON.stringify(
+				{
+				'callBack': 'getHash',
+				}
+			), targetOrigin
+		);
+	} else {
+		return true;
 	}
 }
 
@@ -50,6 +54,7 @@ function novalnetCcIframe()
 window.addEventListener(
 	'message', function (e) {
 	var data = (typeof e.data === 'string') ? eval('(' + e.data + ')') : e.data;
+		
 	if (e.origin === 'https://secure.novalnet.de') {
 		if (data['callBack'] == 'getHash') {
 			if (data['error_message'] != undefined) {
@@ -77,4 +82,3 @@ $(document).ready(
 	);
 	}
 );
-
